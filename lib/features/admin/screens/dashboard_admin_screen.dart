@@ -3,6 +3,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/custom_text.dart';
 import '../../../core/widgets/custom_card.dart';
+import '../../../core/services/session_service.dart';
 import '../../../data/services/json_service.dart';
 import '../../../features/auth/screens/login_screen.dart';
 import 'user_management_screen.dart';
@@ -92,13 +93,17 @@ class _DashboardAdminScreenState extends State<DashboardAdminScreen> {
                             child: const Text('Batal'),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (_) => const LoginScreen(),
-                                ),
-                                (route) => false,
-                              );
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              await SessionService.instance.clearSession();
+                              if (context.mounted) {
+                                Navigator.of(context).pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginScreen(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
                             },
                             child: const Text(
                               'Logout',

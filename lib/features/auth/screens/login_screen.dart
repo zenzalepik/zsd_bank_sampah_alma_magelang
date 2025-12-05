@@ -7,6 +7,7 @@ import 'package:bank_sampah/data/models/driver.dart';
 import 'package:bank_sampah/data/models/nasabah.dart';
 import 'package:bank_sampah/data/services/json_service.dart';
 import 'package:flutter/material.dart';
+import '../../../core/services/session_service.dart';
 import '../../nasabah/screens/beranda_nasabah_screen.dart';
 import '../../driver/screens/beranda_driver_screen.dart';
 import '../../admin/screens/dashboard_admin_screen.dart';
@@ -45,6 +46,11 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
         _selectedRole,
       );
+
+      if (!mounted) return;
+
+      // Save session
+      await SessionService.instance.saveSession(user.id, _selectedRole);
 
       if (!mounted) return;
 

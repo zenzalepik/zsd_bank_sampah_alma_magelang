@@ -37,13 +37,14 @@ flutter run
 
 ### 👤 Nasabah Account
 ```
-Username: dewi123
+Username: andi123
 Password: nasabah123
 ```
 **Data Nasabah:**
-- Nama: Dewi Lestari
+- Nama: Andi Budiman
 - Balance: Rp 250,000
 - Withdrawable: Rp 200,000
+- Total Transaksi: 3 (1 proses, 2 selesai)
 
 ### 🚗 Driver Account
 ```
@@ -73,14 +74,14 @@ Password: admin123
 **Steps:**
 1. Buka aplikasi
 2. Pilih role chip **"Nasabah"**
-3. Input username: `dewi123`
+3. Input username: `andi123`
 4. Input password: `nasabah123`
 5. Tap button **"Masuk"**
 
 **Expected Results:**
 - ✓ Loading indicator muncul
 - ✓ Navigate ke Beranda Nasabah
-- ✓ Greeting "Selamat Datang, Dewi Lestari"
+- ✓ Greeting "Selamat Datang, Andi Budiman"
 - ✓ Balance card menampilkan Rp 250,000
 - ✓ Withdrawable balance Rp 200,000
 - ✓ 3 quick action buttons visible
@@ -141,21 +142,22 @@ Password: admin123
 
 **Steps:**
 1. Tap tab **"Riwayat"** di bottom navigation
-2. Lihat list transaksi (should have dummy data)
+2. Lihat list transaksi (Andi Budiman punya 3 transaksi: 1 proses, 2 selesai)
 3. Tap filter chip **"Proses"**
-4. Tap salah satu transaction card
-5. Lihat detail modal
-6. **Test WhatsApp:** Jika driver assigned, tap **"Hubungi Driver via WhatsApp"**
+4. Should show 1 transaction (TRX-008 dengan driver Andi Wijaya)
+5. Tap transaction card untuk detail modal
+6. **Test WhatsApp:** Tap **"Hubungi Driver via WhatsApp"**
 7. Verify WhatsApp terbuka dengan pesan pre-filled
 
 **Expected Results:**
-- ✓ List transactions tampil dengan cards
-- ✓ Filter chips working (All, Proses, Dijemput, Selesai, Dibatalkan)
+- ✓ Tab "Semua" shows 3 transactions (TRX-001, TRX-006, TRX-008)
+- ✓ Filter "Proses" shows 1 transaction (TRX-008)
+- ✓ Filter "Selesai" shows 2 transactions (TRX-001, TRX-006)
 - ✓ Status badges warna berbeda per status
 - ✓ Detail modal muncul dengan drag handle
-- ✓ Transaction info lengkap (ID, date, status, items, total, address)
-- ✓ WhatsApp button HANYA muncul jika driver assigned & status aktif
-- ✓ WhatsApp opens dengan pesan: "Halo {driver}, saya ingin menanyakan tentang penjemputan sampah TRX-xxx"
+- ✓ Transaction TRX-008 info: 2 items (Plastik HDPE 8kg, Kertas Koran 12kg), Total Rp 32,000
+- ✓ WhatsApp button muncul (karena driver assigned & status=proses)
+- ✓ WhatsApp opens dengan pesan: "Halo Andi Wijaya, saya ingin menanyakan tentang penjemputan sampah TRX-008"
 
 **WhatsApp Testing:**
 - [ ] Button hanya muncul jika `driverId != null`
@@ -186,7 +188,7 @@ Password: admin123
 **Steps:**
 1. Tap tab **"Profile"**
 2. Tap **"Edit Profil"**
-3. Change nama: `Dewi Lestari Updated`
+3. Change nama: `Andi Budiman Updated`
 4. Tap **"Simpan"**
 5. Back dan verify name updated
 6. Tap **"Ganti Password"**

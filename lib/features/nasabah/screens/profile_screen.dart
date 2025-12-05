@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/custom_text.dart';
 import '../../../core/widgets/custom_card.dart';
 import '../../../data/models/nasabah.dart';
+import '../../../core/services/session_service.dart';
 import '../../../features/auth/screens/login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
@@ -157,14 +158,17 @@ class ProfileScreen extends StatelessWidget {
                         child: const Text('Batal'),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.of(context).pop();
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
-                            ),
-                            (route) => false,
-                          );
+                          await SessionService.instance.clearSession();
+                          if (context.mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          }
                         },
                         child: const Text(
                           'Logout',

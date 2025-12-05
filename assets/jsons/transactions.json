@@ -2,7 +2,7 @@
     {
         "id": "trx001",
         "nasabahId": "nasabah001",
-        "nasabahName": "Dewi Lestari",
+        "nasabahName": "Andi Budiman",
         "driverId": "driver001",
         "driverName": "Budi Santoso",
         "createdAt": "2024-12-01T10:30:00Z",
@@ -145,7 +145,7 @@
     {
         "id": "trx006",
         "nasabahId": "nasabah001",
-        "nasabahName": "Dewi Lestari",
+        "nasabahName": "Andi Budiman",
         "driverId": "driver001",
         "driverName": "Budi Santoso",
         "createdAt": "2024-11-28T13:00:00Z",
@@ -194,5 +194,35 @@
         "latitude": -7.4680,
         "longitude": 110.2190,
         "notes": "Nasabah membatalkan"
+    },
+    {
+        "id": "trx008",
+        "nasabahId": "nasabah001",
+        "nasabahName": "Andi Budiman",
+        "driverId": "driver002",
+        "driverName": "Andi Wijaya",
+        "createdAt": "2024-12-05T07:30:00Z",
+        "status": "proses",
+        "items": [
+            {
+                "categoryId": "cat002",
+                "categoryName": "Plastik HDPE",
+                "weight": 8,
+                "pricePerKg": 2500,
+                "subtotal": 20000
+            },
+            {
+                "categoryId": "cat005",
+                "categoryName": "Kertas Koran",
+                "weight": 12,
+                "pricePerKg": 1000,
+                "subtotal": 12000
+            }
+        ],
+        "totalAmount": 32000,
+        "address": "Jl. Magelang No. 10, Kota Magelang",
+        "latitude": -7.4754,
+        "longitude": 110.2177,
+        "notes": "Penjemputan pagi"
     }
 ]

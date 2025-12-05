@@ -2,7 +2,7 @@
     {
         "id": "wd001",
         "nasabahId": "nasabah001",
-        "nasabahName": "Dewi Lestari",
+        "nasabahName": "Andi Budiman",
         "amount": 50000,
         "createdAt": "2024-12-01T15:00:00Z",
         "status": "terverifikasi",
@@ -54,7 +54,7 @@
     {
         "id": "wd005",
         "nasabahId": "nasabah001",
-        "nasabahName": "Dewi Lestari",
+        "nasabahName": "Andi Budiman",
         "amount": 150000,
         "createdAt": "2024-11-28T16:00:00Z",
         "status": "terverifikasi",

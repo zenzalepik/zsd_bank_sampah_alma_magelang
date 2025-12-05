@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/splash/screens/splash_screen.dart';
 
 void main() {
   runApp(const BankSampahApp());
@@ -15,7 +16,7 @@ class BankSampahApp extends StatelessWidget {
       title: 'Bank Sampah Alma Magelang',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }

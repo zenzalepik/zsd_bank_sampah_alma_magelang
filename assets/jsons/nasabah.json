@@ -1,13 +1,13 @@
 [
     {
         "id": "nasabah001",
-        "username": "dewi123",
+        "username": "andi123",
         "phone": "082134567890",
-        "email": "dewi@example.com",
+        "email": "andi@example.com",
         "password": "nasabah123",
         "role": "nasabah",
         "avatarUrl": null,
-        "fullName": "Dewi Lestari",
+        "fullName": "Andi Budiman",
         "address": "Jl. Magelang No. 10, Kota Magelang",
         "latitude": -7.4754,
         "longitude": 110.2177,
