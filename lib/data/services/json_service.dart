@@ -22,6 +22,19 @@ class JsonService {
   List<Transaction>? _transactions;
   List<Withdrawal>? _withdrawals;
 
+  /// Initialize all data
+  Future<void> initialize() async {
+    await Future.wait([
+      loadAdmins(),
+      loadDrivers(),
+      loadNasabahs(),
+      loadCompany(),
+      loadCategories(),
+      loadTransactions(),
+      loadWithdrawals(),
+    ]);
+  }
+
   /// Load admin users
   Future<List<User>> loadAdmins() async {
     if (_admins != null) return _admins!;
