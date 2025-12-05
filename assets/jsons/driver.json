@@ -1,0 +1,44 @@
+[
+    {
+        "id": "driver001",
+        "username": "budi_driver",
+        "phone": "081234567891",
+        "email": "budi@banksampah-alma.id",
+        "password": "driver123",
+        "role": "driver",
+        "avatarUrl": null,
+        "fullName": "Budi Santoso",
+        "vehicleNumber": "AB 1234 CD",
+        "isAvailable": true,
+        "currentLatitude": -7.4704,
+        "currentLongitude": 110.2177
+    },
+    {
+        "id": "driver002",
+        "username": "andi_driver",
+        "phone": "081234567892",
+        "email": "andi@banksampah-alma.id",
+        "password": "driver123",
+        "role": "driver",
+        "avatarUrl": null,
+        "fullName": "Andi Wijaya",
+        "vehicleNumber": "AB 5678 EF",
+        "isAvailable": false,
+        "currentLatitude": -7.4800,
+        "currentLongitude": 110.2200
+    },
+    {
+        "id": "driver003",
+        "username": "siti_driver",
+        "phone": "081234567893",
+        "email": "siti@banksampah-alma.id",
+        "password": "driver123",
+        "role": "driver",
+        "avatarUrl": null,
+        "fullName": "Siti Rahayu",
+        "vehicleNumber": "AB 9012 GH",
+        "isAvailable": true,
+        "currentLatitude": -7.4650,
+        "currentLongitude": 110.2150
+    }
+]

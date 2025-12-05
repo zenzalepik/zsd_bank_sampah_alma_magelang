@@ -1,0 +1,559 @@
+# Bank Sampah Flutter Application - Implementation Plan
+
+Membangun aplikasi Bank Sampah berbasis Flutter sesuai dengan flow.md. Aplikasi ini memiliki 2 role utama: Nasabah (customer) dan Driver. Untuk fase ini, akan menggunakan dummy data JSON sebagai pengganti Firebase.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Technology Stack Decision**
+> - Framework: Flutter (latest stable)
+> - State Management: Provider / Riverpod (perlu konfirmasi preferensi)
+> - Data Source: Local JSON files (temporary, akan diganti Firebase)
+> - Maps: Google Maps Flutter plugin
+> - Deep linking: WhatsApp untuk messaging (mengganti inbox)
+
+> [!IMPORTANT]
+> **Fitur yang TIDAK Dikembangkan di Fase Ini**
+> Sesuai catatan di flow.md:
+> - Driver Profile & Management (dikembangkan kemudian)
+> - Inbox & Notifikasi (dialihkan ke WhatsApp button)
+
+> [!IMPORTANT]
+> **Data Dummy JSON**
+> Apakah struktur data berikut sudah sesuai dengan kebutuhan bisnis?
+> - User profiles: admin, driver, nasabah
+> - Company profile: info bank sampah
+> - Categories: kategori sampah dengan harga
+> - Transactions: riwayat transaksi sampah
+> - Withdrawals: riwayat pencairan saldo
+
+## Proposed Changes
+
+### Core Setup
+
+#### [NEW] Project Structure
+```
+zsd_bank_sampah_alma_magelang/
+├── lib/
+│   ├── main.dart
+│   ├── core/
+│   │   ├── theme/
+│   │   │   ├── app_colors.dart
+│   │   │   ├── app_text_styles.dart
+│   │   │   └── app_theme.dart
+│   │   ├── widgets/
+│   │   │   ├── custom_text.dart
+│   │   │   ├── custom_button.dart
+│   │   │   ├── custom_text_field.dart
+│   │   │   └── custom_card.dart
+│   │   └── utils/
+│   │       └── constants.dart
+│   ├── data/
+│   │   ├── models/
+│   │   │   ├── user.dart
+│   │   │   ├── nasabah.dart
+│   │   │   ├── driver.dart
+│   │   │   ├── category.dart
+│   │   │   ├── transaction.dart
+│   │   │   └── withdrawal.dart
+│   │   └── services/
+│   │       └── json_service.dart
+│   ├── features/
+│   │   ├── auth/
+│   │   │   ├── screens/
+│   │   │   │   ├── login_screen.dart
+│   │   │   │   ├── register_screen.dart
+│   │   │   │   ├── forgot_password_screen.dart
+│   │   │   │   └── otp_screen.dart
+│   │   │   └── widgets/
+│   │   ├── nasabah/
+│   │   │   ├── screens/
+│   │   │   │   ├── beranda_nasabah_screen.dart
+│   │   │   │   ├── profile_screen.dart
+│   │   │   │   ├── edit_profile_screen.dart
+│   │   │   │   ├── change_password_screen.dart
+│   │   │   │   ├── pengajuan_sampah_screen.dart
+│   │   │   │   ├── pencairan_saldo_screen.dart
+│   │   │   │   ├── riwayat_transaksi_screen.dart
+│   │   │   │   └── riwayat_pencairan_screen.dart
+│   │   │   └── widgets/
+│   │   ├── driver/
+│   │   │   ├── screens/
+│   │   │   │   ├── beranda_driver_screen.dart
+│   │   │   │   ├── detail_penjemputan_screen.dart
+│   │   │   │   └── riwayat_penjemputan_screen.dart
+│   │   │   └── widgets/
+│   │   └── admin/
+│   │       ├── screens/
+│   │       │   ├── dashboard_admin_screen.dart
+│   │       │   ├── user_management_screen.dart
+│   │       │   ├── withdrawal_management_screen.dart
+│   │       │   ├── transaction_monitoring_screen.dart
+│   │       │   ├── category_management_screen.dart
+│   │       │   └── company_profile_screen.dart
+│   │       └── widgets/
+│   └── routes/
+│       └── app_router.dart
+├── assets/
+│   ├── images/
+│   └── jsons/
+│       ├── admin.json
+│       ├── driver.json
+│       ├── nasabah.json
+│       ├── company.json
+│       ├── categories.json
+│       ├── transactions.json
+│       └── withdrawals.json
+└── pubspec.yaml
+```
+
+---
+
+### Data Layer
+
+#### [NEW] Data Models
+
+**user.dart** - Base user model dengan authentication fields
+```dart
+class User {
+  String id;
+  String username;
+  String phone;
+  String email;
+  String password;
+  String role; // 'admin', 'driver', 'nasabah'
+  String? avatarUrl;
+}
+```
+
+**nasabah.dart** - Extends User dengan fields spesifik nasabah
+```dart
+class Nasabah extends User {
+  String fullName;
+  String address;
+  double latitude;
+  double longitude;
+  double balance;
+  double withdrawableBalance;
+}
+```
+
+**driver.dart** - Extends User dengan fields spesifik driver
+```dart
+class Driver extends User {
+  String fullName;
+  String vehicleNumber;
+  bool isAvailable;
+  double currentLatitude;
+  double currentLongitude;
+}
+```
+
+**category.dart** - Kategori sampah dengan harga per kg
+```dart
+class Category {
+  String id;
+  String name;
+  String iconUrl;
+  double pricePerKg;
+}
+```
+
+**transaction.dart** - Transaksi pengajuan sampah
+```dart
+class Transaction {
+  String id;
+  String nasabahId;
+  String? driverId;
+  DateTime createdAt;
+  String status; // 'proses', 'dijemput', 'selesai', 'dibatalkan'
+  List<TransactionItem> items;
+  double totalAmount;
+  String address;
+  double latitude;
+  double longitude;
+}
+
+class TransactionItem {
+  String categoryId;
+  double weight;
+  double subtotal;
+}
+```
+
+**withdrawal.dart** - Pencairan saldo
+```dart
+class Withdrawal {
+  String id;
+  String nasabahId;
+  double amount;
+  DateTime createdAt;
+  String status; // 'pending', 'terverifikasi', 'dibatalkan'
+  String method; // 'cash', 'saldo'
+  String? proofImageUrl;
+}
+```
+
+#### [NEW] JSON Data Service
+
+**json_service.dart** - Service untuk load dan parse JSON files
+- Methods: loadUsers(), loadCategories(), loadTransactions(), etc.
+- Singleton pattern untuk efficiency
+- Error handling untuk file not found
+
+#### [NEW] Dummy JSON Files
+
+**admin.json** - 1 admin user
+**driver.json** - 2-3 driver users dengan berbagai status
+**nasabah.json** - 5-10 nasabah users dengan varied balances
+**company.json** - Info Bank Sampah Alma Magelang
+**categories.json** - 10-15 kategori sampah (plastik, kertas, logam, dll)
+**transactions.json** - 20+ sample transactions dengan berbagai status
+**withdrawals.json** - 10+ sample withdrawals dengan berbagai status
+
+---
+
+### UI Core Components
+
+#### [NEW] Theme System
+
+**app_colors.dart** - Color palette
+- Primary, secondary, accent colors
+- Neutral colors (background, text, borders)
+- Status colors (success, warning, error)
+
+**app_text_styles.dart** - Typography system
+- Heading styles (h1, h2, h3)
+- Body text styles
+- Button text styles
+- Caption and helper text
+
+**app_theme.dart** - ThemeData configuration
+- Light theme (default)
+- Dark theme (optional)
+
+#### [NEW] Reusable Widgets
+
+**custom_text.dart** - Text widget dengan predefined styles
+- HeadingText, BodyText, CaptionText
+- Consistent typography usage
+
+**custom_button.dart** - Button variants
+- PrimaryButton, SecondaryButton, OutlineButton
+- Loading state support
+
+**custom_text_field.dart** - Input field dengan validation
+- Standard text input
+- Password input dengan show/hide
+- Phone number input
+- Email input
+
+**custom_card.dart** - Card component untuk lists dan details
+- Elevation, padding, border radius consistent
+
+---
+
+### Authentication Module
+
+#### [NEW] [login_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/auth/screens/login_screen.dart)
+- Input: username/phone + password
+- Role selection: Nasabah atau Driver
+- Navigation ke forgot password
+- Validation dan error handling
+
+#### [NEW] [register_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/auth/screens/register_screen.dart)
+- Form: username, phone, email, password
+- Password confirmation
+- Navigate to OTP screen
+- Only for Nasabah (driver di-manage admin)
+
+#### [NEW] [forgot_password_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/auth/screens/forgot_password_screen.dart)
+- Input: email/username
+- Navigate to OTP screen
+
+#### [NEW] [otp_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/auth/screens/otp_screen.dart)
+- 6-digit OTP input
+- Resend OTP option
+- Success popup
+
+---
+
+### Nasabah Module
+
+#### [NEW] [beranda_nasabah_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/beranda_nasabah_screen.dart)
+- Headline/slider promo
+- Grid kategori sampah
+- Bottom navigation: Beranda, Profile, Riwayat, Pengajuan
+- Quick access buttons
+
+#### [NEW] [profile_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/profile_screen.dart)
+- Display user info
+- Navigate to Edit Profile
+- Navigate to Change Password
+- Logout button
+
+#### [NEW] [edit_profile_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/edit_profile_screen.dart)
+- Form: nama, phone, email, address
+- Avatar upload
+- Geolocation picker
+- Save changes
+
+#### [NEW] [change_password_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/change_password_screen.dart)
+- Old password verification
+- New password + confirmation
+- Submit button
+
+#### [NEW] [pengajuan_sampah_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/pengajuan_sampah_screen.dart)
+- Select categories (multi-select)
+- Input weight per category
+- Auto-calculate subtotal & total
+- Address (auto-filled, editable)
+- Submit pengajuan
+- Status tracking
+
+#### [NEW] [pencairan_saldo_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/pencairan_saldo_screen.dart)
+- Display current balance
+- Minimum withdrawal validation
+- Method selection: Cash or Saldo
+- Amount input
+- Submit request
+
+#### [NEW] [riwayat_transaksi_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/riwayat_transaksi_screen.dart)
+- List view dengan cards
+- Display: nomor, categories, total, date, status
+- Filter by status
+- Detail view
+
+#### [NEW] [riwayat_pencairan_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/riwayat_pencairan_screen.dart)
+- List view dengan cards
+- Display: nomor, amount, date, status, proof image
+- Filter by status
+
+---
+
+### Driver Module
+
+#### [NEW] [beranda_driver_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/driver/screens/beranda_driver_screen.dart)
+- List active pickups
+- WhatsApp button untuk messages
+- Bottom navigation: Beranda, Riwayat
+- Quick actions
+
+#### [NEW] [detail_penjemputan_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/driver/screens/detail_penjemputan_screen.dart)
+- Alamat detail dengan maps embed
+- Info sampah (categories, weights)
+- WhatsApp button untuk contact nasabah
+- Status update buttons: 
+  - Approve penjemputan
+  - Sedang dijemput
+  - Sampai di lokasi
+- Edit pengajuan (adjust weights jika tidak sesuai)
+- Complete button
+
+#### [NEW] [riwayat_penjemputan_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/driver/screens/riwayat_penjemputan_screen.dart)
+- List completed pickups
+- Filter by date
+- Detail view
+
+---
+
+### Admin Module
+
+#### [NEW] [dashboard_admin_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/dashboard_admin_screen.dart)
+- Statistics cards:
+  - Total nasabah
+  - Total driver
+  - Total transaksi bulan ini
+  - Total pencairan pending
+- Recent transactions list
+- Navigation menu ke semua fitur admin
+- Quick actions
+
+#### [NEW] [user_management_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/user_management_screen.dart)
+- Tab view: Nasabah & Driver
+- List users dengan search & filter
+- User details: nama, phone, email, status
+- Actions:
+  - Add new driver (form dialog)
+  - Edit user details
+  - Activate/Deactivate user
+- Pagination untuk large datasets
+
+#### [NEW] [withdrawal_management_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/withdrawal_management_screen.dart)
+- Tab view: Pending, Terverifikasi, Dibatalkan
+- List withdrawals dengan details:
+  - Nasabah name
+  - Amount
+  - Method
+  - Date
+- Actions untuk pending:
+  - Approve: upload proof of payment image
+  - Reject: input reason
+- View proof of payment untuk terverifikasi
+
+#### [NEW] [transaction_monitoring_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/transaction_monitoring_screen.dart)
+- List all transactions dengan filter:
+  - Date range
+  - Status
+  - Nasabah
+  - Driver
+- Export to CSV/PDF report
+- Transaction details view
+- Statistics summary
+
+#### [NEW] [category_management_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/category_management_screen.dart)
+- Grid/List view categories
+- Add new category:
+  - Name
+  - Icon/image upload
+  - Price per kg
+- Edit existing category
+- Delete category (with confirmation)
+- Sort categories
+
+#### [NEW] [company_profile_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/company_profile_screen.dart)
+- Edit company info:
+  - Name: Bank Sampah Alma Magelang
+  - Address
+  - Phone & Email
+  - Operational hours
+  - Logo upload
+  - About/Description
+- Minimum withdrawal amount setting
+- Save changes
+
+---
+
+### Integration & Services
+
+#### [NEW] WhatsApp Integration
+- Button component untuk open WhatsApp
+- Pre-filled message template
+- Deep linking ke WhatsApp app
+
+#### [NEW] Maps Integration
+- Google Maps Flutter plugin
+- Display location di detail penjemputan
+- Navigation assistance untuk driver
+- Location picker untuk edit profile nasabah
+
+---
+
+### Navigation & Routing
+
+#### [NEW] [app_router.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/routes/app_router.dart)
+- Route definitions untuk semua screens
+- Protected routes (require auth)
+- Role-based routing
+
+#### [NEW] Bottom Navigation
+- Nasabah: Beranda, Profile, Riwayat, Pengajuan
+- Driver: Beranda, Riwayat
+- Admin: Dashboard, Users, Withdrawals, Transactions, Categories
+
+---
+
+## Verification Plan
+
+### Automated Tests
+
+**Unit Tests**
+```bash
+# Test data models parsing
+flutter test test/models/
+
+# Test JSON service
+flutter test test/services/json_service_test.dart
+```
+
+**Widget Tests**
+```bash
+# Test reusable components
+flutter test test/widgets/
+
+# Test authentication screens
+flutter test test/features/auth/
+```
+
+### Manual Verification
+
+**Authentication Flow**
+1. Run app: `flutter run`
+2. Test Register flow:
+   - Buka register screen
+   - Fill form dengan data valid
+   - Submit dan verify OTP screen muncul
+3. Test Login flow:
+   - Login sebagai Nasabah
+   - Login sebagai Driver
+   - Verify redirect ke beranda sesuai role
+4. Test Forgot Password:
+   - Input email
+   - Verify OTP screen
+   - Reset password
+
+**Nasabah Flow**
+1. Login sebagai nasabah (dari dummy data)
+2. Beranda: verify categories tampil dari JSON
+3. Profile: edit profile dan save
+4. Pengajuan Sampah:
+   - Select categories
+   - Input weights
+   - Verify calculation correct
+   - Submit
+   - Check riwayat transaksi
+5. Pencairan Saldo:
+   - Check balance
+   - Input amount
+   - Submit
+   - Check riwayat pencairan
+
+**Driver Flow**
+1. Login sebagai driver (dari dummy data)
+2. Beranda: verify list penjemputan dari JSON
+3. Detail Penjemputan:
+   - Verify maps tampil dengan location correct
+   - Test WhatsApp button
+   - Update status
+   - Edit weights if needed
+   - Complete pickup
+4. Riwayat: verify completed pickups
+
+**Admin Flow**
+1. Login sebagai admin (dari dummy data)
+2. Dashboard:
+   - Verify statistics cards tampil dengan data correct
+   - Check recent transactions
+3. User Management:
+   - View list nasabah & driver
+   - Add new driver
+   - Edit user details
+   - Deactivate/activate user
+4. Withdrawal Management:
+   - View pending withdrawals
+   - Approve withdrawal dengan upload proof
+   - Reject withdrawal dengan reason
+   - Check terverifikasi list
+5. Transaction Monitoring:
+   - View all transactions
+   - Test filters (date, status, user)
+   - View transaction details
+6. Category Management:
+   - Add new category
+   - Edit category price
+   - Delete category
+7. Company Profile:
+   - Edit company info
+   - Set minimum withdrawal amount
+   - Save changes
+
+**UI/UX Verification**
+1. Verify semua text menggunakan custom_text widgets
+2. Verify semua buttons menggunakan custom_button
+3. Verify color scheme consistent (from app_colors)
+4. Verify responsive layout di berbagai screen sizes
+5. Verify navigation smooth dan intuitive
+
+**Data Persistence**
+1. Verify JSON files loaded correctly
+2. Verify data updates reflected di UI (meskipun tidak persist ke file untuk fase ini)

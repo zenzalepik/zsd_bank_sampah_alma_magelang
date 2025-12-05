@@ -1,0 +1,198 @@
+[
+    {
+        "id": "trx001",
+        "nasabahId": "nasabah001",
+        "nasabahName": "Dewi Lestari",
+        "driverId": "driver001",
+        "driverName": "Budi Santoso",
+        "createdAt": "2024-12-01T10:30:00Z",
+        "status": "selesai",
+        "items": [
+            {
+                "categoryId": "cat001",
+                "categoryName": "Plastik PET",
+                "weight": 5,
+                "pricePerKg": 3000,
+                "subtotal": 15000
+            },
+            {
+                "categoryId": "cat006",
+                "categoryName": "Kardus",
+                "weight": 10,
+                "pricePerKg": 1200,
+                "subtotal": 12000
+            }
+        ],
+        "totalAmount": 27000,
+        "address": "Jl. Magelang No. 10, Kota Magelang",
+        "latitude": -7.4754,
+        "longitude": 110.2177,
+        "notes": null
+    },
+    {
+        "id": "trx002",
+        "nasabahId": "nasabah003",
+        "nasabahName": "Rina Susanti",
+        "driverId": "driver001",
+        "driverName": "Budi Santoso",
+        "createdAt": "2024-12-02T14:15:00Z",
+        "status": "dijemput",
+        "items": [
+            {
+                "categoryId": "cat008",
+                "categoryName": "Aluminium",
+                "weight": 3,
+                "pricePerKg": 5000,
+                "subtotal": 15000
+            },
+            {
+                "categoryId": "cat004",
+                "categoryName": "Kertas HVS",
+                "weight": 8,
+                "pricePerKg": 1500,
+                "subtotal": 12000
+            }
+        ],
+        "totalAmount": 27000,
+        "address": "Jl. Veteran No. 5, Kota Magelang",
+        "latitude": -7.4680,
+        "longitude": 110.2190,
+        "notes": null
+    },
+    {
+        "id": "trx003",
+        "nasabahId": "nasabah002",
+        "nasabahName": "Agus Prasetyo",
+        "driverId": null,
+        "driverName": null,
+        "createdAt": "2024-12-03T09:00:00Z",
+        "status": "proses",
+        "items": [
+            {
+                "categoryId": "cat005",
+                "categoryName": "Kertas Koran",
+                "weight": 15,
+                "pricePerKg": 1000,
+                "subtotal": 15000
+            }
+        ],
+        "totalAmount": 15000,
+        "address": "Jl. Tidar No. 25, Kota Magelang",
+        "latitude": -7.4700,
+        "longitude": 110.2150,
+        "notes": null
+    },
+    {
+        "id": "trx004",
+        "nasabahId": "nasabah005",
+        "nasabahName": "Sri Wati",
+        "driverId": "driver003",
+        "driverName": "Siti Rahayu",
+        "createdAt": "2024-12-03T11:20:00Z",
+        "status": "selesai",
+        "items": [
+            {
+                "categoryId": "cat001",
+                "categoryName": "Plastik PET",
+                "weight": 7,
+                "pricePerKg": 3000,
+                "subtotal": 21000
+            },
+            {
+                "categoryId": "cat002",
+                "categoryName": "Plastik HDPE",
+                "weight": 4,
+                "pricePerKg": 2500,
+                "subtotal": 10000
+            },
+            {
+                "categoryId": "cat006",
+                "categoryName": "Kardus",
+                "weight": 12,
+                "pricePerKg": 1200,
+                "subtotal": 14400
+            }
+        ],
+        "totalAmount": 45400,
+        "address": "Jl. Ahmad Yani No. 30, Kota Magelang",
+        "latitude": -7.4750,
+        "longitude": 110.2120,
+        "notes": null
+    },
+    {
+        "id": "trx005",
+        "nasabahId": "nasabah004",
+        "nasabahName": "Bambang Hartono",
+        "driverId": null,
+        "driverName": null,
+        "createdAt": "2024-12-04T08:45:00Z",
+        "status": "proses",
+        "items": [
+            {
+                "categoryId": "cat007",
+                "categoryName": "Besi",
+                "weight": 6,
+                "pricePerKg": 4000,
+                "subtotal": 24000
+            }
+        ],
+        "totalAmount": 24000,
+        "address": "Jl. Pahlawan No. 15, Kota Magelang",
+        "latitude": -7.4820,
+        "longitude": 110.2210,
+        "notes": null
+    },
+    {
+        "id": "trx006",
+        "nasabahId": "nasabah001",
+        "nasabahName": "Dewi Lestari",
+        "driverId": "driver001",
+        "driverName": "Budi Santoso",
+        "createdAt": "2024-11-28T13:00:00Z",
+        "status": "selesai",
+        "items": [
+            {
+                "categoryId": "cat004",
+                "categoryName": "Kertas HVS",
+                "weight": 20,
+                "pricePerKg": 1500,
+                "subtotal": 30000
+            },
+            {
+                "categoryId": "cat011",
+                "categoryName": "Buku/Duplex",
+                "weight": 10,
+                "pricePerKg": 800,
+                "subtotal": 8000
+            }
+        ],
+        "totalAmount": 38000,
+        "address": "Jl. Magelang No. 10, Kota Magelang",
+        "latitude": -7.4754,
+        "longitude": 110.2177,
+        "notes": null
+    },
+    {
+        "id": "trx007",
+        "nasabahId": "nasabah003",
+        "nasabahName": "Rina Susanti",
+        "driverId": "driver003",
+        "driverName": "Siti Rahayu",
+        "createdAt": "2024-11-25T10:30:00Z",
+        "status": "dibatalkan",
+        "items": [
+            {
+                "categoryId": "cat001",
+                "categoryName": "Plastik PET",
+                "weight": 3,
+                "pricePerKg": 3000,
+                "subtotal": 9000
+            }
+        ],
+        "totalAmount": 9000,
+        "address": "Jl. Veteran No. 5, Kota Magelang",
+        "latitude": -7.4680,
+        "longitude": 110.2190,
+        "notes": "Nasabah membatalkan"
+    }
+]

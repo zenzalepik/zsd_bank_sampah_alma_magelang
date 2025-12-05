@@ -1,0 +1,80 @@
+[
+    {
+        "id": "wd001",
+        "nasabahId": "nasabah001",
+        "nasabahName": "Dewi Lestari",
+        "amount": 50000,
+        "createdAt": "2024-12-01T15:00:00Z",
+        "status": "terverifikasi",
+        "method": "cash",
+        "proofImageUrl": "https://example.com/proof/wd001.jpg",
+        "notes": "Pencairan ke rekening BCA",
+        "rejectionReason": null,
+        "processedAt": "2024-12-02T10:00:00Z"
+    },
+    {
+        "id": "wd002",
+        "nasabahId": "nasabah003",
+        "nasabahName": "Rina Susanti",
+        "amount": 100000,
+        "createdAt": "2024-12-03T09:30:00Z",
+        "status": "pending",
+        "method": "cash",
+        "proofImageUrl": null,
+        "notes": null,
+        "rejectionReason": null,
+        "processedAt": null
+    },
+    {
+        "id": "wd003",
+        "nasabahId": "nasabah005",
+        "nasabahName": "Sri Wati",
+        "amount": 75000,
+        "createdAt": "2024-12-03T14:20:00Z",
+        "status": "pending",
+        "method": "saldo",
+        "proofImageUrl": null,
+        "notes": null,
+        "rejectionReason": null,
+        "processedAt": null
+    },
+    {
+        "id": "wd004",
+        "nasabahId": "nasabah002",
+        "nasabahName": "Agus Prasetyo",
+        "amount": 30000,
+        "createdAt": "2024-11-30T11:00:00Z",
+        "status": "dibatalkan",
+        "method": "cash",
+        "proofImageUrl": null,
+        "notes": null,
+        "rejectionReason": "Saldo tidak mencukupi",
+        "processedAt": "2024-11-30T15:00:00Z"
+    },
+    {
+        "id": "wd005",
+        "nasabahId": "nasabah001",
+        "nasabahName": "Dewi Lestari",
+        "amount": 150000,
+        "createdAt": "2024-11-28T16:00:00Z",
+        "status": "terverifikasi",
+        "method": "cash",
+        "proofImageUrl": "https://example.com/proof/wd005.jpg",
+        "notes": "Transfer ke BRI",
+        "rejectionReason": null,
+        "processedAt": "2024-11-29T09:00:00Z"
+    },
+    {
+        "id": "wd006",
+        "nasabahId": "nasabah003",
+        "nasabahName": "Rina Susanti",
+        "amount": 200000,
+        "createdAt": "2024-11-26T10:15:00Z",
+        "status": "terverifikasi",
+        "method": "cash",
+        "proofImageUrl": "https://example.com/proof/wd006.jpg",
+        "notes": "Transfer ke Mandiri",
+        "rejectionReason": null,
+        "processedAt": "2024-11-27T11:30:00Z"
+    }
+]

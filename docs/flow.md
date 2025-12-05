@@ -5,6 +5,7 @@ Baik, saya akan breakdown semua flow yang ada dari ketiga dokumen tersebut secar
 ### 🔐 **AUTHENTICATION FLOW**
 
 #### **Register Nasabah**
+
 ```
 1. Input: username, nomor handphone, password, email
 2. Button: Daftar
@@ -13,6 +14,7 @@ Baik, saya akan breakdown semua flow yang ada dari ketiga dokumen tersebut secar
 ```
 
 #### **Login (Nasabah & Driver)**
+
 ```
 - Input: username/nomor handphone + password
 - Validation: Credential check
@@ -20,6 +22,7 @@ Baik, saya akan breakdown semua flow yang ada dari ketiga dokumen tersebut secar
 ```
 
 #### **Lupa Password**
+
 ```
 1. Input: email/username
 2. Submit: Request reset
@@ -33,6 +36,7 @@ Baik, saya akan breakdown semua flow yang ada dari ketiga dokumen tersebut secar
 ## 👤 **NASABAH FLOW**
 
 ### **Beranda Nasabah**
+
 ```
 ├── Headline/Slider promo
 ├── List kategori sampah
@@ -45,6 +49,7 @@ Baik, saya akan breakdown semua flow yang ada dari ketiga dokumen tersebut secar
 ```
 
 ### **Profile Management**
+
 ```
 Edit Profile:
 ├── Nama (textbox)
@@ -63,6 +68,7 @@ Ubah Password:
 ```
 
 ### **Pengajuan Sampah Flow**
+
 ```
 1. Pilih kategori sampah
 2. Input jumlah/berat
@@ -73,6 +79,7 @@ Ubah Password:
 ```
 
 ### **Pencairan Saldo Flow**
+
 ```
 1. Cek saldo yang dapat dicairkan
 2. Verifikasi minimum pencairan
@@ -83,6 +90,7 @@ Ubah Password:
 ```
 
 ### **Riwayat & Tracking**
+
 ```
 Riwayat Transaksi:
 ├── Nomor Transaksi
@@ -105,6 +113,7 @@ Riwayat Pencairan:
 ## 🚚 **DRIVER FLOW**
 
 ### **Beranda Driver**
+
 ```
 ├── List penjemputan aktif
 ├── Inbox pesan
@@ -116,6 +125,7 @@ Riwayat Pencairan:
 ```
 
 ### **Penjemputan Process**
+
 ```
 1. Terima list penjemputan dari sistem
 2. Buka detail penjemputan:
@@ -130,6 +140,7 @@ Riwayat Pencairan:
 ```
 
 ### **Driver Profile & Management**
+
 ```
 Sama dengan nasabah plus:
 ├── Geolocation tracking
@@ -142,6 +153,7 @@ Sama dengan nasabah plus:
 ## 🔄 **CROSS-FUNCTIONAL FLOWS**
 
 ### **Transaksi Sampah End-to-End**
+
 ```
 Nasabah:
 1. Ajukan sampah → 2. Tunggu driver → 3. Konfirmasi penerimaan
@@ -154,6 +166,7 @@ System:
 ```
 
 ### **Inbox & Notifikasi**
+
 ```
 Pesan meliputi:
 ├── Notifikasi transaksi
@@ -173,16 +186,19 @@ Format:
 ## ⚠️ **SPECIAL CASES & EXCEPTIONS**
 
 ### **Edit Pengajuan Sampah**
+
 - **Kondisi**: Ketika kuantitas sampah tidak sesuai di lapangan
 - **Aktor**: Driver
 - **Action**: Edit kuantitas aktual sebelum approve
 - **Impact**: Penyesuaian saldo nasabah
 
 ### **Minimum Pencairan**
+
 - Validasi minimum amount sebelum pengajuan pencairan
 - Sistem tolak jika tidak memenuhi minimum
 
 ### **Geolocation Integration**
+
 - Maps embed untuk driver
 - Alamat detail dengan koordinat
 - Navigation assistance
@@ -191,14 +207,32 @@ Format:
 
 ## 🎯 **SUMMARY KEY FEATURES**
 
-| Module | Nasabah | Driver | Admin |
-|--------|---------|--------|-------|
-| Auth | ✅ | ✅ | ❓ |
-| Profile Management | ✅ | ✅ | ❓ |
-| Pengajuan Sampah | ✅ | ❌ | ❓ |
-| Penjemputan | ❌ | ✅ | ❓ |
-| Pencairan Saldo | ✅ | ❌ | ❓ |
-| Riwayat Transaksi | ✅ | ✅ | ❓ |
-| Inbox Pesan | ✅ | ✅ | ❓ |
+| Module             | Nasabah | Driver | Admin |
+| ------------------ | ------- | ------ | ----- |
+| Auth               | ✅      | ✅     | ❓    |
+| Profile Management | ✅      | ✅     | ❓    |
+| Pengajuan Sampah   | ✅      | ❌     | ❓    |
+| Penjemputan        | ❌      | ✅     | ❓    |
+| Pencairan Saldo    | ✅      | ❌     | ❓    |
+| Riwayat Transaksi  | ✅      | ✅     | ❓    |
+| Inbox Pesan        | ✅      | ✅     | ❓    |
 
-Apakah Anda ingin saya detailkan lebih lanjut untuk flow tertentu atau membuat diagram visual dari breakdown ini?
+=======================================================================
+
+# Catatan:
+
+Untuk saat ini, beberapa fitur berikut tidak dikembangkan dahulu:
+
+1. Driver Profile & Management
+2. Inbox & Notifikasi ==> Untuk halaman pesan dialihkan dengan tombol whatsapp.
+
+# Database menggunakan firebase, namun untuk saat ini pakai dummy data dulu dengan folder jsons. Sembari menunggu waktu eksekusi database.
+
+# UI Code harus clean dan simpel serta modular dan reusable. Termasuk pada tiap komponen atau widget seperti teks harus pakai konsep reusable component, agar mudah untuk pengembangannya.
+
+# Siapkan data dummy json:
+
+1. Profil user admin.
+2. Profil User driver.
+3. Profil user nasabah.
+4. Profil perusahaan/bank sampah.

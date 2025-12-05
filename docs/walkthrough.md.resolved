@@ -1,0 +1,1735 @@
+# Bank Sampah Alma Magelang - Development Walkthrough
+
+## Progress Summary
+
+Berhasil menyelesaikan fondasi aplikasi Bank Sampah dengan arsitektur yang clean, modular, dan reusable sesuai requirement di flow.md.
+
+## What Has Been Completed
+
+### 1. Project Setup & Architecture
+
+- Initialized Flutter project dengan struktur folder terorganisir
+- Configured pubspec.yaml dengan asset paths untuk JSON dummy data
+- Setup Material 3 dengan custom theme system
+
+### 2. Theme System & Design
+
+#### Color Palette
+Created sustainability-focused color scheme:
+- **Primary Green** (#2E7D32): Representing environmental sustainability
+- **Secondary Blue** (#1976D2): Professional and trustworthy
+- **Accent Orange** (#FF6F00): Call-to-action elements
+- Status colors untuk transaction (proses, dijemput, selesai, dibatalkan)
+- Status colors untuk withdrawal (pending, terverifikasi, dibatalkan)
+
+#### Typography System
+- 5 levels heading (H1-H5)
+- 3 sizes body text (large, medium, small)
+- Specialized styles untuk price display, captions, buttons, dan input fields
+
+#### Theme Configuration
+Comprehensive Material 3 theme dengan:
+- Card, Button, TextField, Dialog, BottomNavigationBar themes
+- Consistent spacing constants (8/16/24/32)
+- Consistent border radius (8/12/16/24)
+
+### 3. Reusable Component Library
+
+#### Custom Text Widgets
+```diff:custom_text.dart
+===
+import 'package:flutter/material.dart';
+import '../theme/app_text_styles.dart';
+import '../theme/app_colors.dart';
+
+/// Reusable text widgets with predefined styles
+
+class HeadingText extends StatelessWidget {
+  final String text;
+  final int level; // 1-5
+  final Color? color;
+  final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  
+  const HeadingText(
+    this.text, {
+    super.key,
+    this.level = 1,
+    this.color,
+    this.textAlign,
+    this.maxLines,
+    this.overflow,
+  }) : assert(level >= 1 && level <= 5, 'Level must be between 1 and 5');
+  
+  @override
+  Widget build(BuildContext context) {
+    TextStyle style;
+    switch (level) {
+      case 1:
+        style = AppTextStyles.h1;
+        break;
+      case 2:
+        style = AppTextStyles.h2;
+        break;
+      case 3:
+        style = AppTextStyles.h3;
+        break;
+      case 4:
+        style = AppTextStyles.h4;
+        break;
+      case 5:
+        style = AppTextStyles.h5;
+        break;
+      default:
+        style = AppTextStyles.h1;
+    }
+    
+    if (color != null) {
+      style = style.copyWith(color: color);
+    }
+    
+    return Text(
+      text,
+      style: style,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: overflow,
+    );
+  }
+}
+
+class BodyText extends StatelessWidget {
+  final String text;
+  final String size; // 'large', 'medium', 'small'
+  final Color? color;
+  final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  final FontWeight? fontWeight;
+  
+  const BodyText(
+    this.text, {
+    super.key,
+    this.size = 'medium',
+    this.color,
+    this.textAlign,
+    this.maxLines,
+    this.overflow,
+    this.fontWeight,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    TextStyle style;
+    switch (size) {
+      case 'large':
+        style = AppTextStyles.bodyLarge;
+        break;
+      case 'small':
+        style = AppTextStyles.bodySmall;
+        break;
+      default:
+        style = AppTextStyles.bodyMedium;
+    }
+    
+    if (color != null) {
+      style = style.copyWith(color: color);
+    }
+    
+    if (fontWeight != null) {
+      style = style.copyWith(fontWeight: fontWeight);
+    }
+    
+    return Text(
+      text,
+      style: style,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: overflow,
+    );
+  }
+}
+
+class CaptionText extends StatelessWidget {
+  final String text;
+  final Color? color;
+  final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  
+  const CaptionText(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.maxLines,
+    this.overflow,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    TextStyle style = AppTextStyles.caption;
+    
+    if (color != null) {
+      style = style.copyWith(color: color);
+    }
+    
+    return Text(
+      text,
+      style: style,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: overflow,
+    );
+  }
+}
+
+class PriceText extends StatelessWidget {
+  final double amount;
+  final String size; // 'normal', 'small'
+  final Color? color;
+  final String prefix;
+  
+  const PriceText(
+    this.amount, {
+    super.key,
+    this.size = 'normal',
+    this.color,
+    this.prefix = 'Rp ',
+  });
+  
+  String _formatCurrency(double amount) {
+    final String amountStr = amount.toStringAsFixed(0);
+    final RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return amountStr.replaceAllMapped(reg, (Match m) => '${m[1]}.');
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    TextStyle style = size == 'small' ? AppTextStyles.priceSmall : AppTextStyles.price;
+    
+    if (color != null) {
+      style = style.copyWith(color: color);
+    }
+    
+    return Text(
+      '$prefix${_formatCurrency(amount)}',
+      style: style,
+    );
+  }
+}
+
+class StatusBadge extends StatelessWidget {
+  final String status;
+  final String type; // 'transaction' or 'withdrawal'
+  
+  const StatusBadge({
+    super.key,
+    required this.status,
+    this.type = 'transaction',
+  });
+  
+  Color _getStatusColor() {
+    if (type == 'transaction') {
+      switch (status.toLowerCase()) {
+        case 'proses':
+          return AppColors.statusProses;
+        case 'dijemput':
+          return AppColors.statusDijemput;
+        case 'selesai':
+          return AppColors.statusSelesai;
+        case 'dibatalkan':
+          return AppColors.statusDibatalkan;
+        default:
+          return AppColors.textSecondary;
+      }
+    } else {
+      switch (status.toLowerCase()) {
+        case 'pending':
+          return AppColors.statusPending;
+        case 'terverifikasi':
+          return AppColors.statusTerverifikasi;
+        case 'dibatalkan':
+          return AppColors.statusRejected;
+        default:
+          return AppColors.textSecondary;
+      }
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    final color = _getStatusColor();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color, width: 1),
+      ),
+      child: Text(
+        status,
+        style: AppTextStyles.bodySmall.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+```
+
+Components:
+- [HeadingText](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text.dart#7-61): 5 level headings
+- [BodyText](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text.dart#62-113): 3 sizes dengan custom color & weight
+- [CaptionText](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text.dart#114-147): Small helper text
+- [PriceText](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text.dart#148-181): Currency formatting dengan Rp prefix
+- [StatusBadge](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text.dart#182-241): Transaction & withdrawal status badges
+
+#### Custom Buttons
+```diff:custom_button.dart
+===
+import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
+
+/// Reusable button widgets
+
+class PrimaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
+  final String size; // 'normal', 'small'
+  
+  const PrimaryButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.icon,
+    this.size = 'normal',
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    final double verticalPadding = size == 'small' ? 12 : 16;
+    final TextStyle textStyle = size == 'small' ? AppTextStyles.buttonSmall : AppTextStyles.button;
+    
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.textOnPrimary,
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: verticalPadding),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.textOnPrimary),
+                ),
+              )
+            : icon != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(icon, size: size == 'small' ? 18 : 20),
+                      const SizedBox(width: 8),
+                      Text(text, style: textStyle),
+                    ],
+                  )
+                : Text(text, style: textStyle),
+      ),
+    );
+  }
+}
+
+class SecondaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
+  final String size; // 'normal', 'small'
+  
+  const SecondaryButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.icon,
+    this.size = 'normal',
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    final double verticalPadding = size == 'small' ? 12 : 16;
+    final TextStyle textStyle = size == 'small' 
+        ? AppTextStyles.buttonSmall.copyWith(color: AppColors.primary)
+        : AppTextStyles.button.copyWith(color: AppColors.primary);
+    
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryLight.withOpacity(0.1),
+          foregroundColor: AppColors.primary,
+          elevation: 0,
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: verticalPadding),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                ),
+              )
+            : icon != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(icon, size: size == 'small' ? 18 : 20),
+                      const SizedBox(width: 8),
+                      Text(text, style: textStyle),
+                    ],
+                  )
+                : Text(text, style: textStyle),
+      ),
+    );
+  }
+}
+
+class OutlineButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
+  final String size; // 'normal', 'small'
+  final Color? borderColor;
+  final Color? textColor;
+  
+  const OutlineButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.icon,
+    this.size = 'normal',
+    this.borderColor,
+    this.textColor,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    final double verticalPadding = size == 'small' ? 12 : 16;
+    final Color finalBorderColor = borderColor ?? AppColors.primary;
+    final Color finalTextColor = textColor ?? AppColors.primary;
+    final TextStyle textStyle = size == 'small' 
+        ? AppTextStyles.buttonSmall.copyWith(color: finalTextColor)
+        : AppTextStyles.button.copyWith(color: finalTextColor);
+    
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: finalTextColor,
+          side: BorderSide(color: finalBorderColor, width: 2),
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: verticalPadding),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: isLoading
+            ? SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(finalTextColor),
+                ),
+              )
+            : icon != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(icon, size: size == 'small' ? 18 : 20),
+                      const SizedBox(width: 8),
+                      Text(text, style: textStyle),
+                    ],
+                  )
+                : Text(text, style: textStyle),
+      ),
+    );
+  }
+}
+
+class IconTextButton extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final VoidCallback? onPressed;
+  final Color? color;
+  
+  const IconTextButton({
+    super.key,
+    required this.icon,
+    required this.text,
+    this.onPressed,
+    this.color,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    final Color buttonColor = color ?? AppColors.primary;
+    
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: buttonColor),
+      label: Text(
+        text,
+        style: AppTextStyles.button.copyWith(color: buttonColor),
+      ),
+    );
+  }
+}
+```
+
+Components:
+- [PrimaryButton](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_button.dart#7-70): Main action button dengan loading state
+- [SecondaryButton](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_button.dart#71-133): Alternative action button
+- [OutlineButton](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_button.dart#134-201): Border-only button
+- [IconTextButton](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_button.dart#202-230): Text button dengan icon
+
+#### Custom Text Fields
+```diff:custom_text_field.dart
+===
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
+
+/// Reusable text field widgets with validation
+
+class CustomTextField extends StatefulWidget {
+  final String label;
+  final String? hint;
+  final TextEditingController? controller;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  final IconData? prefixIcon;
+  final Widget? suffixIcon;
+  final bool enabled;
+  final int? maxLines;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatters;
+  
+  const CustomTextField({
+    super.key,
+    required this.label,
+    this.hint,
+    this.controller,
+    this.keyboardType = TextInputType.text,
+    this.obscureText = false,
+    this.validator,
+    this.onChanged,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.enabled = true,
+    this.maxLines = 1,
+    this.maxLength,
+    this.inputFormatters,
+  });
+  
+  @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label,
+          style: AppTextStyles.inputLabel,
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: widget.controller,
+          keyboardType: widget.keyboardType,
+          obscureText: widget.obscureText,
+          validator: widget.validator,
+          onChanged: widget.onChanged,
+          enabled: widget.enabled,
+          maxLines: widget.maxLines,
+          maxLength: widget.maxLength,
+          inputFormatters: widget.inputFormatters,
+          style: AppTextStyles.inputText,
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+            suffixIcon: widget.suffixIcon,
+            filled: true,
+            fillColor: widget.enabled ? AppColors.surface : AppColors.surfaceVariant,
+            counterText: '',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class PasswordTextField extends StatefulWidget {
+  final String label;
+  final String? hint;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  
+  const PasswordTextField({
+    super.key,
+    required this.label,
+    this.hint,
+    this.controller,
+    this.validator,
+    this.onChanged,
+  });
+  
+  @override
+  State<PasswordTextField> createState() => _PasswordTextFieldState();
+}
+
+class _PasswordTextFieldState extends State<PasswordTextField> {
+  bool _obscureText = true;
+  
+  void _toggleObscureText() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label,
+          style: AppTextStyles.inputLabel,
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: widget.controller,
+          obscureText: _obscureText,
+          validator: widget.validator,
+          onChanged: widget.onChanged,
+          style: AppTextStyles.inputText,
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            prefixIcon: const Icon(Icons.lock_outline),
+            suffixIcon: IconButton(
+              icon: Icon(_obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+              onPressed: _toggleObscureText,
+            ),
+            filled: true,
+            fillColor: AppColors.surface,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class PhoneTextField extends StatelessWidget {
+  final String label;
+  final String? hint;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  
+  const PhoneTextField({
+    super.key,
+    required this.label,
+    this.hint,
+    this.controller,
+    this.validator,
+    this.onChanged,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.inputLabel,
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.phone,
+          validator: validator,
+          onChanged: onChanged,
+          style: AppTextStyles.inputText,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(13),
+          ],
+          decoration: InputDecoration(
+            hintText: hint ?? '08xxxxxxxxxx',
+            prefixIcon: const Icon(Icons.phone_outlined),
+            filled: true,
+            fillColor: AppColors.surface,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class EmailTextField extends StatelessWidget {
+  final String label;
+  final String? hint;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  
+  const EmailTextField({
+    super.key,
+    required this.label,
+    this.hint,
+    this.controller,
+    this.validator,
+    this.onChanged,
+  });
+  
+  String? _emailValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email tidak boleh kosong';
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Format email tidak valid';
+    }
+    return null;
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.inputLabel,
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          validator: validator ?? _emailValidator,
+          onChanged: onChanged,
+          style: AppTextStyles.inputText,
+          decoration: InputDecoration(
+            hintText: hint ?? 'email@example.com',
+            prefixIcon: const Icon(Icons.email_outlined),
+            filled: true,
+            fillColor: AppColors.surface,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class SearchTextField extends StatelessWidget {
+  final String? hint;
+  final TextEditingController? controller;
+  final void Function(String)? onChanged;
+  final VoidCallback? onClear;
+  
+  const SearchTextField({
+    super.key,
+    this.hint,
+    this.controller,
+    this.onChanged,
+    this.onClear,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      style: AppTextStyles.inputText,
+      decoration: InputDecoration(
+        hintText: hint ?? 'Cari...',
+        prefixIcon: const Icon(Icons.search),
+        suffixIcon: controller?.text.isNotEmpty == true
+            ? IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: onClear,
+              )
+            : null,
+        filled: true,
+        fillColor: AppColors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+      ),
+    );
+  }
+}
+```
+
+Components:
+- [CustomTextField](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text_field.dart#8-43): General purpose input dengan validation
+- [PasswordTextField](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text_field.dart#81-100): Password input dengan show/hide toggle
+- [PhoneTextField](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text_field.dart#143-187): Phone input dengan digit-only formatting
+- [EmailTextField](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text_field.dart#188-239): Email input dengan built-in validation
+- [SearchTextField](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_text_field.dart#240-276): Search input dengan clear button
+
+#### Custom Cards
+```diff:custom_card.dart
+===
+import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+
+/// Reusable card widgets
+
+class CustomCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final VoidCallback? onTap;
+  final Color? color;
+  final double? elevation;
+  
+  const CustomCard({
+    super.key,
+    required this.child,
+    this.padding,
+    this.margin,
+    this.onTap,
+    this.color,
+    this.elevation,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    final cardWidget = Card(
+      elevation: elevation ?? 2,
+      color: color ?? AppColors.surface,
+      margin: margin ?? const EdgeInsets.symmetric(
+        horizontal: AppTheme.paddingMedium,
+        vertical: 8,
+      ),
+      child: Padding(
+        padding: padding ?? const EdgeInsets.all(AppTheme.paddingMedium),
+        child: child,
+      ),
+    );
+    
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        child: cardWidget,
+      );
+    }
+    
+    return cardWidget;
+  }
+}
+
+class InfoCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData? icon;
+  final Color? iconColor;
+  final VoidCallback? onTap;
+  
+  const InfoCard({
+    super.key,
+    required this.title,
+    required this.value,
+    this.icon,
+    this.iconColor,
+    this.onTap,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return CustomCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: (iconColor ?? AppColors.primary).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor ?? AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onTap != null)
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.textSecondary,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onTap;
+  
+  const StatCard({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.color = AppColors.primary,
+    this.onTap,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return CustomCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class EmptyStateCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? actionText;
+  final VoidCallback? onAction;
+  
+  const EmptyStateCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.actionText,
+    this.onAction,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.paddingLarge),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 80,
+              color: AppColors.textSecondary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (actionText != null && onAction != null) ...[
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: onAction,
+                child: Text(actionText!),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+Components:
+- [CustomCard](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_card.dart#7-53): Base card dengan optional tap handler
+- [InfoCard](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_card.dart#54-121): Key-value display dengan icon
+- [StatCard](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_card.dart#122-177): Dashboard statistics card
+- [EmptyStateCard](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/core/widgets/custom_card.dart#178-236): Empty list placeholder
+
+### 4. Data Layer
+
+#### Models Created (7 Total)
+
+**User Model** - Base authentication model
+```dart
+User(id, username, phone, email, password, role, avatarUrl)
+```
+
+**Nasabah Model** - Customer dengan balance tracking
+```dart
+Nasabah extends User + (fullName, address, latitude, longitude, balance, withdrawableBalance)
+```
+
+**Driver Model** - Driver dengan vehicle & availability
+```dart
+Driver extends User + (fullName, vehicleNumber, isAvailable, currentLatitude, currentLongitude)
+```
+
+**Category Model** - Waste types dengan pricing
+```dart
+Category(id, name, iconUrl, pricePerKg, description)
+```
+
+**Transaction Model** - Waste pickup transactions
+```dart
+Transaction(id, nasabahId, driverId, createdAt, status, items[], totalAmount, address, location)
+TransactionItem(categoryId, categoryName, weight, pricePerKg, subtotal)
+```
+
+**Withdrawal Model** - Balance withdrawal requests
+```dart
+Withdrawal(id, nasabahId, amount, createdAt, status, method, proofImageUrl, notes, rejectionReason)
+```
+
+**Company Model** - Organization profile
+```dart
+Company(id, name, address, phone, email, logoUrl, description, operationalHours, minimumWithdrawal)
+```
+
+#### JSON Service
+```diff:json_service.dart
+===
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import '../models/user.dart';
+import '../models/nasabah.dart';
+import '../models/driver.dart';
+import '../models/category.dart';
+import '../models/transaction.dart';
+import '../models/withdrawal.dart';
+import '../models/company.dart';
+
+/// Service for loading and managing JSON data
+class JsonService {
+  JsonService._();
+  static final JsonService instance = JsonService._();
+  
+  // Cached data
+  List<User>? _admins;
+  List<Driver>? _drivers;
+  List<Nasabah>? _nasabahs;
+  Company? _company;
+  List<Category>? _categories;
+  List<Transaction>? _transactions;
+  List<Withdrawal>? _withdrawals;
+  
+  /// Load admin users
+  Future<List<User>> loadAdmins() async {
+    if (_admins != null) return _admins!;
+    
+    final String jsonString = await rootBundle.loadString('assets/jsons/admin.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    _admins = jsonData.map((json) => User.fromJson(json)).toList();
+    return _admins!;
+  }
+  
+  /// Load drivers
+  Future<List<Driver>> loadDrivers() async {
+    if (_drivers != null) return _drivers!;
+    
+    final String jsonString = await rootBundle.loadString('assets/jsons/driver.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    _drivers = jsonData.map((json) => Driver.fromJson(json)).toList();
+    return _drivers!;
+  }
+  
+  /// Load nasabahs
+  Future<List<Nasabah>> loadNasabahs() async {
+    if (_nasabahs != null) return _nasabahs!;
+    
+    final String jsonString = await rootBundle.loadString('assets/jsons/nasabah.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    _nasabahs = jsonData.map((json) => Nasabah.fromJson(json)).toList();
+    return _nasabahs!;
+  }
+  
+  /// Load company profile
+  Future<Company> loadCompany() async {
+    if (_company != null) return _company!;
+    
+    final String jsonString = await rootBundle.loadString('assets/jsons/company.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    _company = Company.fromJson(jsonData[0]);
+    return _company!;
+  }
+  
+  /// Load categories
+  Future<List<Category>> loadCategories() async {
+    if (_categories != null) return _categories!;
+    
+    final String jsonString = await rootBundle.loadString('assets/jsons/categories.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    _categories = jsonData.map((json) => Category.fromJson(json)).toList();
+    return _categories!;
+  }
+  
+  /// Load transactions
+  Future<List<Transaction>> loadTransactions() async {
+    if (_transactions != null) return _transactions!;
+    
+    final String jsonString = await rootBundle.loadString('assets/jsons/transactions.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    _transactions = jsonData.map((json) => Transaction.fromJson(json)).toList();
+    return _transactions!;
+  }
+  
+  /// Load withdrawals
+  Future<List<Withdrawal>> loadWithdrawals() async {
+    if (_withdrawals != null) return _withdrawals!;
+    
+    final String jsonString = await rootBundle.loadString('assets/jsons/withdrawals.json');
+    final List<dynamic> jsonData = json.decode(jsonString);
+    _withdrawals = jsonData.map((json) => Withdrawal.fromJson(json)).toList();
+    return _withdrawals!;
+  }
+  
+  /// Authenticate user
+  Future<dynamic> authenticate(String username, String password, String role) async {
+    if (role == 'admin') {
+      final admins = await loadAdmins();
+      return admins.firstWhere(
+        (user) => user.username == username && user.password == password,
+        orElse: () => throw Exception('Invalid credentials'),
+      );
+    } else if (role == 'driver') {
+      final drivers = await loadDrivers();
+      return drivers.firstWhere(
+        (user) => user.username == username && user.password == password,
+        orElse: () => throw Exception('Invalid credentials'),
+      );
+    } else if (role == 'nasabah') {
+      final nasabahs = await loadNasabahs();
+      return nasabahs.firstWhere(
+        (user) => user.username == username && user.password == password,
+        orElse: () => throw Exception('Invalid credentials'),
+      );
+    }
+    throw Exception('Invalid role');
+  }
+  
+  /// Get nasabah by ID
+  Future<Nasabah?> getNasabahById(String id) async {
+    final nasabahs = await loadNasabahs();
+    try {
+      return nasabahs.firstWhere((n) => n.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  /// Get driver by ID
+  Future<Driver?> getDriverById(String id) async {
+    final drivers = await loadDrivers();
+    try {
+      return drivers.firstWhere((d) => d.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  /// Get category by ID
+  Future<Category?> getCategoryById(String id) async {
+    final categories = await loadCategories();
+    try {
+      return categories.firstWhere((c) => c.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  /// Get transactions by nasabah ID
+  Future<List<Transaction>> getTransactionsByNasabahId(String nasabahId) async {
+    final transactions = await loadTransactions();
+    return transactions.where((t) => t.nasabahId == nasabahId).toList();
+  }
+  
+  /// Get transactions by driver ID
+  Future<List<Transaction>> getTransactionsByDriverId(String driverId) async {
+    final transactions = await loadTransactions();
+    return transactions.where((t) => t.driverId == driverId).toList();
+  }
+  
+  /// Get withdrawals by nasabah ID
+  Future<List<Withdrawal>> getWithdrawalsByNasabahId(String nasabahId) async {
+    final withdrawals = await loadWithdrawals();
+    return withdrawals.where((w) => w.nasabahId == nasabahId).toList();
+  }
+  
+  /// Clear cache (useful for testing or data refresh)
+  void clearCache() {
+    _admins = null;
+    _drivers = null;
+    _nasabahs = null;
+    _company = null;
+    _categories = null;
+    _transactions = null;
+    _withdrawals = null;
+  }
+}
+```
+
+Features:
+- Singleton pattern dengan caching
+- Load methods untuk semua data types
+- [authenticate()](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/data/services/json_service.dart#109-136) method untuk login validation
+- Query methods (getTransactionsByNasabahId, dll)
+
+### 5. Dummy Data Created
+
+#### Users
+- **1 Admin**: username: `admin`, password: `admin123`
+- **3 Drivers**: Budi Santoso, Andi Wijaya, Siti Rahayu
+  - Credentials: username: `budi_driver`, password: `driver123` (dst)
+- **5 Nasabah**: Dewi, Agus, Rina, Bambang, Sri
+  - Credentials: username contoh: `dewi123`, password: `nasabah123`
+
+#### Waste Categories (12 Types)
+- Plastik PET (Rp 3,000/kg)
+- Plastik HDPE (Rp 2,500/kg)
+- Plastik PP (Rp 2,000/kg)
+- Kertas HVS (Rp 1,500/kg)
+- Kertas Koran (Rp 1,000/kg)
+- Kardus (Rp 1,200/kg)
+- Besi (Rp 4,000/kg)
+- Aluminium (Rp 5,000/kg)
+- Tembaga (Rp 45,000/kg)
+- Botol Kaca (Rp 500/kg)
+- Buku/Duplex (Rp 800/kg)
+- Plastik Campur (Rp 1,000/kg)
+
+#### Sample Transactions
+7 transactions dengan berbagai status:
+- 3 selesai
+- 2 proses  
+- 1 dijemput
+- 1 dibatalkan
+
+#### Sample Withdrawals
+6 withdrawal requests dengan status varied
+
+#### Company Profile
+Bank Sampah Alma Magelang dengan:
+- Minimum withdrawal: Rp 50,000
+- Operational hours: Senin-Jumat 08:00-16:00, Sabtu 08:00-12:00
+
+### 6. Authentication Module
+
+#### Login Screen
+```diff:login_screen.dart
+===
+import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/widgets/custom_text.dart';
+import '../../core/widgets/custom_button.dart';
+import '../../core/widgets/custom_text_field.dart';
+import '../../data/services/json_service.dart';
+import '../../data/models/nasabah.dart';
+import '../../data/models/driver.dart';
+import '../../nasabah/screens/beranda_nasabah_screen.dart';
+import '../../driver/screens/beranda_driver_screen.dart';
+import '../../admin/screens/dashboard_admin_screen.dart';
+import 'register_screen.dart';
+import 'forgot_password_screen.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  String _selectedRole = 'nasabah';
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await JsonService.instance.authenticate(
+        _usernameController.text.trim(),
+        _passwordController.text,
+        _selectedRole,
+      );
+
+      if (!mounted) return;
+
+      // Navigate based on role
+      Widget targetScreen;
+      if (_selectedRole == 'admin') {
+        targetScreen = const DashboardAdminScreen();
+      } else if (_selectedRole == 'driver') {
+        targetScreen = BerandaDriverScreen(driver: user as Driver);
+      } else {
+        targetScreen = BerandaNasabahScreen(nasabah: user as Nasabah);
+      }
+
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => targetScreen));
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login gagal: Username atau password salah'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 40),
+
+                // Logo or App Name
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.recycling,
+                    size: 80,
+                    color: AppColors.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                const HeadingText(
+                  'Bank Sampah',
+                  level: 2,
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 8),
+
+                const BodyText(
+                  'Alma Magelang',
+                  size: 'large',
+                  color: AppColors.textSecondary,
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 40),
+
+                // Role Selection
+                const BodyText(
+                  'Login sebagai',
+                  size: 'medium',
+                  fontWeight: FontWeight.w600,
+                ),
+
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    Expanded(child: _buildRoleChip('Nasabah', 'nasabah')),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildRoleChip('Driver', 'driver')),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildRoleChip('Admin', 'admin')),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Username Field
+                CustomTextField(
+                  label: 'Username / No. Handphone',
+                  hint: 'Masukkan username atau nomor HP',
+                  controller: _usernameController,
+                  prefixIcon: Icons.person_outline,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Username tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Password Field
+                PasswordTextField(
+                  label: 'Password',
+                  hint: 'Masukkan password',
+                  controller: _passwordController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Password tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 8),
+
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Lupa password?',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Login Button
+                PrimaryButton(
+                  text: 'Login',
+                  onPressed: _handleLogin,
+                  isLoading: _isLoading,
+                ),
+
+                if (_selectedRole == 'nasabah') ...[
+                  const SizedBox(height: 24),
+
+                  // Register Link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const BodyText('Belum punya akun? ', size: 'medium'),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const RegisterScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Daftar',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
+                const SizedBox(height: 40),
+
+                // Info Text
+                const CaptionText(
+                  'Dengan login, Anda menyetujui syarat dan ketentuan yang berlaku',
+                  textAlign: TextAlign.center,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleChip(String label, String value) {
+    final isSelected = _selectedRole == value;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedRole = value;
+        });
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+Features:
+- Role selection chips (Nasabah / Driver / Admin)
+- Username/phone + password authentication
+- Form validation
+- Error handling dengan SnackBar
+- Loading state
+- Conditional register link (nasabah only)
+- Forgot password link
+- Role-based navigation ke:
+  - Nasabah → Beranda Nasabah
+  - Driver → Beranda Driver  
+  - Admin → Dashboard Admin
+
+#### Placeholder Screens Created
+- [beranda_nasabah_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/nasabah/screens/beranda_nasabah_screen.dart) - Shows name & balance
+- [beranda_driver_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/driver/screens/beranda_driver_screen.dart) - Shows name, vehicle, availability
+- [dashboard_admin_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/dashboard_admin_screen.dart) - Admin panel placeholder
+- [register_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/auth/screens/register_screen.dart) - Coming soon placeholder
+- [forgot_password_screen.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/features/auth/screens/forgot_password_screen.dart) - Coming soon placeholder
+
+### 7. Main App Configuration
+
+Updated [main.dart](file:///D:/Github/zsd_bank_sampah_alma_magelang/lib/main.dart):
+- Uses custom AppTheme
+- Entry point: LoginScreen
+- App title: "Bank Sampah Alma Magelang"
+
+## Testing Instructions
+
+### Demo Credentials
+
+**Login sebagai Nasabah:**
+- Username: `dewi123`
+- Password: `nasabah123`
+- Expected: Navigate to beranda showing balance Rp 250,000
+
+**Login sebagai Driver:**
+- Username: `budi_driver`
+- Password: `driver123`
+- Expected: Navigate to beranda showing vehicle AB 1234 CD
+
+**Login sebagai Admin:**
+- Username: `admin`
+- Password: `admin123`
+- Expected: Navigate to dashboard admin
+
+### Run Application
+
+```bash
+flutter run
+```
+
+### Verify Features
+1. Role selection berfungsi (chips change color on tap)
+2. Form validation bekerja (empty fields show error)
+3. Wrong credentials show error SnackBar
+4. Correct credentials navigate to appropriate screen
+5. Register link hanya muncul untuk role Nasabah
+
+## Next Steps
+
+Sesuai implementation plan, yang perlu dilakukan selanjutnya:
+
+1. **Complete Authentication Module**
+   - Register screen dengan OTP verification
+   - Forgot password flow
+   - OTP input screen
+
+2. **Nasabah Module**
+   - Beranda dengan kategori sampah grid
+   - Profile management (edit profile, change password)
+   - Pengajuan sampah flow
+   - Pencairan saldo flow
+   - Riwayat transaksi & pencairan
+
+3. **Driver Module**
+   - List penjemputan aktif
+   - Detail penjemputan dengan Maps
+   - Update status flow
+   - Edit kuantitas sampah
+   - Riwayat penjemputan
+
+4. **Admin Module**
+   - Dashboard dengan statistics
+   - User management (CRUD nasabah & driver)
+   - Withdrawal approval system
+   - Transaction monitoring
+   - Category management
+   - Company profile settings
+
+5. **Integration**
+   - WhatsApp deep linking
+   - Google Maps untuk driver navigation
+   - Location picker untuk nasabah address
+
+## Project Statistics
+
+- **Total Models**: 7
+- **Total Screens Created**: 6
+- **Custom Widgets**: 16
+- **Dummy Users**: 9 (1 admin, 3 drivers, 5 nasabah)
+- **Waste Categories**: 12
+- **Sample Data**: 7 transactions, 6 withdrawals
+- **Lines of Code**: ~2,500+ lines
+
+## Architecture Highlights
+
+- **Reusable Components**: All text, buttons, cards use custom widgets
+- **Consistent Design**: AppColors & AppTextStyles used throughout
+- **Clean Separation**: Data, UI, Features well separated
+- **Scalable**: Easy to add new features with existing architecture
+- **Type-Safe**: Full Dart type safety dengan models
+- **Cacheable**: JSON service dengan singleton & caching
+
+---
+
+**Status**: Foundation complete, ready untuk feature development phase.

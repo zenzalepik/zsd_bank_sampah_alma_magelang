@@ -1,0 +1,11 @@
+[
+  {
+    "id": "admin001",
+    "username": "admin",
+    "phone": "081234567890",
+    "email": "admin@banksampah-alma.id",
+    "password": "admin123",
+    "role": "admin",
+    "avatarUrl": null
+  }
+]

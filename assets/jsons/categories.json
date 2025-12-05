@@ -1,0 +1,86 @@
+[
+    {
+        "id": "cat001",
+        "name": "Plastik PET",
+        "iconUrl": "🍾",
+        "pricePerKg": 3000,
+        "description": "Botol plastik minuman, kemasan plastik bening"
+    },
+    {
+        "id": "cat002",
+        "name": "Plastik HDPE",
+        "iconUrl": "🧴",
+        "pricePerKg": 2500,
+        "description": "Botol shampo, detergen, dan kemasan keras"
+    },
+    {
+        "id": "cat003",
+        "name": "Plastik PP",
+        "iconUrl": "🥤",
+        "pricePerKg": 2000,
+        "description": "Gelas plastik, sedotan, tutup botol"
+    },
+    {
+        "id": "cat004",
+        "name": "Kertas HVS",
+        "iconUrl": "📄",
+        "pricePerKg": 1500,
+        "description": "Kertas putih, kertas print bekas"
+    },
+    {
+        "id": "cat005",
+        "name": "Kertas Koran",
+        "iconUrl": "📰",
+        "pricePerKg": 1000,
+        "description": "Koran bekas, majalah"
+    },
+    {
+        "id": "cat006",
+        "name": "Kardus",
+        "iconUrl": "📦",
+        "pricePerKg": 1200,
+        "description": "Kardus bekas, box kemasan"
+    },
+    {
+        "id": "cat007",
+        "name": "Besi",
+        "iconUrl": "🔩",
+        "pricePerKg": 4000,
+        "description": "Besi bekas, paku, seng"
+    },
+    {
+        "id": "cat008",
+        "name": "Aluminium",
+        "iconUrl": "🥫",
+        "pricePerKg": 5000,
+        "description": "Kaleng minuman, aluminium foil"
+    },
+    {
+        "id": "cat009",
+        "name": "Tembaga",
+        "iconUrl": "⚡",
+        "pricePerKg": 45000,
+        "description": "Kabel tembaga, kawat tembaga"
+    },
+    {
+        "id": "cat010",
+        "name": "Botol Kaca",
+        "iconUrl": "🍶",
+        "pricePerKg": 500,
+        "description": "Botol kaca bekas, jar kaca"
+    },
+    {
+        "id": "cat011",
+        "name": "Buku/Duplex",
+        "iconUrl": "📚",
+        "pricePerKg": 800,
+        "description": "Buku bekas, kertas duplex"
+    },
+    {
+        "id": "cat012",
+        "name": "Plastik Campur",
+        "iconUrl": "♻️",
+        "pricePerKg": 1000,
+        "description": "Plastik campur berbagai jenis"
+    }
+]

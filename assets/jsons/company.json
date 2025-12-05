@@ -1,0 +1,13 @@
+[
+    {
+        "id": "company001",
+        "name": "Bank Sampah Alma Magelang",
+        "address": "Jl. Jend. Sudirman No. 100, Kota Magelang, Jawa Tengah 56117",
+        "phone": "0293-362345",
+        "email": "info@banksampah-alma.id",
+        "logoUrl": "",
+        "description": "Bank Sampah Alma Magelang adalah lembaga yang mengelola sampah dengan sistem layaknya perbankan. Nasabah dapat menabung sampah yang dipilah dan akan mendapatkan imbalan sesuai dengan harga sampah yang berlaku. Kami berkomitmen untuk menciptakan lingkungan yang bersih dan sehat melalui pengelolaan sampah yang berkelanjutan.",
+        "operationalHours": "Senin - Jumat: 08:00 - 16:00 WIB, Sabtu: 08:00 - 12:00 WIB",
+        "minimumWithdrawal": 50000
+    }
+]
