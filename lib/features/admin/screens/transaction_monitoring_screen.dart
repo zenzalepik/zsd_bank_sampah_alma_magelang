@@ -4,7 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/custom_text.dart';
 import '../../../core/widgets/custom_card.dart';
 import '../../../data/models/transaction.dart';
-import '../../../data/services/json_service.dart';
+import '../../../data/services/firestore_service.dart';
 
 class TransactionMonitoringScreen extends StatefulWidget {
   const TransactionMonitoringScreen({super.key});
@@ -16,149 +16,134 @@ class TransactionMonitoringScreen extends StatefulWidget {
 
 class _TransactionMonitoringScreenState
     extends State<TransactionMonitoringScreen> {
-  List<Transaction> _transactions = [];
-  bool _isLoading = true;
   String _filterStatus = 'all';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTransactions();
-  }
-
-  Future<void> _loadTransactions() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final transactions = await JsonService.instance.loadTransactions();
-      setState(() {
-        _transactions = transactions;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  List<Transaction> get _filteredTransactions {
-    if (_filterStatus == 'all') {
-      return _transactions;
-    }
-    return _transactions.where((t) => t.status == _filterStatus).toList();
-  }
-
-  double get _totalAmount {
-    return _filteredTransactions.fold(0, (sum, t) => sum + t.totalAmount);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Monitoring Transaksi')),
-      body: Column(
-        children: [
-          // Statistics Summary
-          Container(
-            margin: const EdgeInsets.all(AppTheme.paddingMedium),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    const BodyText(
-                      'Total Transaksi',
-                      size: 'small',
-                      color: AppColors.textOnPrimary,
-                    ),
-                    const SizedBox(height: 8),
-                    HeadingText(
-                      _filteredTransactions.length.toString(),
-                      level: 3,
-                      color: AppColors.textOnPrimary,
-                    ),
-                  ],
-                ),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: AppColors.textOnPrimary.withOpacity(0.3),
-                ),
-                Column(
-                  children: [
-                    const BodyText(
-                      'Total Nilai',
-                      size: 'small',
-                      color: AppColors.textOnPrimary,
-                    ),
-                    const SizedBox(height: 8),
-                    PriceText(
-                      _totalAmount,
-                      size: 'small',
-                      color: AppColors.textOnPrimary,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+      body: StreamBuilder<List<Transaction>>(
+        stream: FirestoreService.instance.getTransactionsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-          // Filter Chips
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.paddingMedium,
-            ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip('Semua', 'all'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Proses', 'proses'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Dijemput', 'dijemput'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Selesai', 'selesai'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Dibatalkan', 'dibatalkan'),
-                ],
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final transactions = snapshot.data ?? [];
+          final filteredTransactions = _filterStatus == 'all'
+              ? transactions
+              : transactions.where((t) => t.status == _filterStatus).toList();
+
+          final totalAmount = filteredTransactions.fold(
+            0.0,
+            (sum, t) => sum + t.totalAmount,
+          );
+
+          return Column(
+            children: [
+              // Statistics Summary
+              Container(
+                margin: const EdgeInsets.all(AppTheme.paddingMedium),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      children: [
+                        const BodyText(
+                          'Total Transaksi',
+                          size: 'small',
+                          color: AppColors.textOnPrimary,
+                        ),
+                        const SizedBox(height: 8),
+                        HeadingText(
+                          filteredTransactions.length.toString(),
+                          level: 3,
+                          color: AppColors.textOnPrimary,
+                        ),
+                      ],
+                    ),
+                    Container(
+                      width: 1,
+                      height: 40,
+                      color: AppColors.textOnPrimary.withOpacity(0.3),
+                    ),
+                    Column(
+                      children: [
+                        const BodyText(
+                          'Total Nilai',
+                          size: 'small',
+                          color: AppColors.textOnPrimary,
+                        ),
+                        const SizedBox(height: 8),
+                        PriceText(
+                          totalAmount,
+                          size: 'small',
+                          color: AppColors.textOnPrimary,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
 
-          const SizedBox(height: 16),
-
-          // Transactions List
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _filteredTransactions.isEmpty
-                ? EmptyStateCard(
-                    icon: Icons.receipt_long_outlined,
-                    title: 'Tidak Ada Data',
-                    message: _filterStatus == 'all'
-                        ? 'Belum ada transaksi'
-                        : 'Tidak ada transaksi dengan status $_filterStatus',
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadTransactions,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.paddingMedium,
-                      ),
-                      itemCount: _filteredTransactions.length,
-                      itemBuilder: (context, index) {
-                        final transaction = _filteredTransactions[index];
-                        return _buildTransactionCard(transaction);
-                      },
-                    ),
+              // Filter Chips
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.paddingMedium,
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip('Semua', 'all'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Proses', 'proses'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Dijemput', 'dijemput'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Selesai', 'selesai'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Dibatalkan', 'dibatalkan'),
+                    ],
                   ),
-          ),
-        ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Transactions List
+              Expanded(
+                child: filteredTransactions.isEmpty
+                    ? EmptyStateCard(
+                        icon: Icons.receipt_long_outlined,
+                        title: 'Tidak Ada Data',
+                        message: _filterStatus == 'all'
+                            ? 'Belum ada transaksi'
+                            : 'Tidak ada transaksi dengan status $_filterStatus',
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.paddingMedium,
+                        ),
+                        itemCount: filteredTransactions.length,
+                        itemBuilder: (context, index) {
+                          final transaction = filteredTransactions[index];
+                          return _buildTransactionCard(transaction);
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

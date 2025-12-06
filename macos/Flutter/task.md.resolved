@@ -1,0 +1,16 @@
+# Tugas: Migrasi Sistem Penuh ke Firebase
+
+- [ ] Analisis Model dan Layar yang tersisa <!-- id: 0 -->
+- [x] Buat Rencana Implementasi Migrasi Penuh <!-- id: 1 -->
+- [x] Update [FirestoreService](file:///d:/Github/zsd_bank_sampah_alma_magelang/lib/data/services/firestore_service.dart#8-161) untuk semua fitur <!-- id: 2 -->
+    - [x] Users (Admin, Driver, Nasabah)
+    - [x] Transactions
+    - [x] Withdrawals
+    - [x] Company Profile
+- [/] Refactor Layar Admin <!-- id: 3 -->
+    - [x] [UserManagementScreen](file:///d:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/user_management_screen.dart#9-15)
+    - [x] [TransactionMonitoringScreen](file:///d:/Github/zsd_bank_sampah_alma_magelang/lib/features/admin/screens/transaction_monitoring_screen.dart#9-16)
+    - [/] `WithdrawalManagementScreen`
+    - [ ] `CompanyProfileScreen`
+- [ ] Refactor Layar Lain (jika ada, misal Login) <!-- id: 4 -->
+- [ ] Verifikasi Kode <!-- id: 5 -->

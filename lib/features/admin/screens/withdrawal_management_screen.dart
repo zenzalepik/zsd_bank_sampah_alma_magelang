@@ -6,7 +6,7 @@ import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_card.dart';
 import '../../../core/widgets/custom_text_field.dart';
 import '../../../data/models/withdrawal.dart';
-import '../../../data/services/json_service.dart';
+import '../../../data/services/firestore_service.dart';
 
 class WithdrawalManagementScreen extends StatefulWidget {
   const WithdrawalManagementScreen({super.key});
@@ -18,36 +18,7 @@ class WithdrawalManagementScreen extends StatefulWidget {
 
 class _WithdrawalManagementScreenState
     extends State<WithdrawalManagementScreen> {
-  List<Withdrawal> _withdrawals = [];
-  bool _isLoading = true;
   String _filterStatus = 'pending';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadWithdrawals();
-  }
-
-  Future<void> _loadWithdrawals() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final withdrawals = await JsonService.instance.loadWithdrawals();
-      setState(() {
-        _withdrawals = withdrawals;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  List<Withdrawal> get _filteredWithdrawals {
-    if (_filterStatus == 'all') {
-      return _withdrawals;
-    }
-    return _withdrawals.where((w) => w.status == _filterStatus).toList();
-  }
 
   Future<void> _approveWithdrawal(Withdrawal withdrawal) async {
     showDialog(
@@ -78,19 +49,29 @@ class _WithdrawalManagementScreenState
             onPressed: () async {
               Navigator.pop(context);
 
-              // Simulate approval
-              await Future.delayed(const Duration(seconds: 1));
+              try {
+                await FirestoreService.instance.updateWithdrawalStatus(
+                  withdrawal.id,
+                  'terverifikasi',
+                );
 
-              if (!mounted) return;
+                if (!mounted) return;
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pencairan berhasil disetujui'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-
-              _loadWithdrawals();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pencairan berhasil disetujui'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Gagal menyetujui: $e'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
             },
             child: const Text(
               'Setujui',
@@ -141,19 +122,34 @@ class _WithdrawalManagementScreenState
 
               Navigator.pop(context);
 
-              // Simulate rejection
-              await Future.delayed(const Duration(seconds: 1));
+              try {
+                // Note: Currently updateWithdrawalStatus only updates status.
+                // If we need to save rejection reason, we need to update FirestoreService
+                // or just update status for now as per current service capability.
+                // Ideally we should update the service to accept reason.
+                // For now, just updating status to 'dibatalkan'.
+                await FirestoreService.instance.updateWithdrawalStatus(
+                  withdrawal.id,
+                  'dibatalkan',
+                );
 
-              if (!mounted) return;
+                if (!mounted) return;
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pencairan ditolak'),
-                  backgroundColor: AppColors.error,
-                ),
-              );
-
-              _loadWithdrawals();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pencairan ditolak'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Gagal menolak: $e'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
             },
             child: const Text(
               'Tolak',
@@ -169,54 +165,67 @@ class _WithdrawalManagementScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Manajemen Pencairan')),
-      body: Column(
-        children: [
-          // Filter Chips
-          Container(
-            padding: const EdgeInsets.all(AppTheme.paddingMedium),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip('Pending', 'pending'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Semua', 'all'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Terverifikasi', 'terverifikasi'),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('Dibatalkan', 'dibatalkan'),
-                ],
-              ),
-            ),
-          ),
+      body: StreamBuilder<List<Withdrawal>>(
+        stream: FirestoreService.instance.getWithdrawalsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-          // Withdrawals List
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _filteredWithdrawals.isEmpty
-                ? EmptyStateCard(
-                    icon: Icons.inbox_outlined,
-                    title: 'Tidak Ada Data',
-                    message: _filterStatus == 'pending'
-                        ? 'Tidak ada pencairan yang menunggu approval'
-                        : 'Tidak ada pencairan dengan status $_filterStatus',
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadWithdrawals,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.paddingMedium,
-                      ),
-                      itemCount: _filteredWithdrawals.length,
-                      itemBuilder: (context, index) {
-                        final withdrawal = _filteredWithdrawals[index];
-                        return _buildWithdrawalCard(withdrawal);
-                      },
-                    ),
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final withdrawals = snapshot.data ?? [];
+          final filteredWithdrawals = _filterStatus == 'all'
+              ? withdrawals
+              : withdrawals.where((w) => w.status == _filterStatus).toList();
+
+          return Column(
+            children: [
+              // Filter Chips
+              Container(
+                padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip('Pending', 'pending'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Semua', 'all'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Terverifikasi', 'terverifikasi'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Dibatalkan', 'dibatalkan'),
+                    ],
                   ),
-          ),
-        ],
+                ),
+              ),
+
+              // Withdrawals List
+              Expanded(
+                child: filteredWithdrawals.isEmpty
+                    ? EmptyStateCard(
+                        icon: Icons.inbox_outlined,
+                        title: 'Tidak Ada Data',
+                        message: _filterStatus == 'pending'
+                            ? 'Tidak ada pencairan yang menunggu approval'
+                            : 'Tidak ada pencairan dengan status $_filterStatus',
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.paddingMedium,
+                        ),
+                        itemCount: filteredWithdrawals.length,
+                        itemBuilder: (context, index) {
+                          final withdrawal = filteredWithdrawals[index];
+                          return _buildWithdrawalCard(withdrawal);
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -3,7 +3,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/custom_text.dart';
 import '../../../data/models/category.dart';
-import '../../../data/services/json_service.dart';
+import '../../../data/services/firestore_service.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   const AddCategoryScreen({super.key});
@@ -35,9 +35,6 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
-
       final newCategory = Category(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text,
@@ -46,7 +43,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         iconUrl: _iconController.text.isEmpty ? '📦' : _iconController.text,
       );
 
-      JsonService.instance.addCategory(newCategory);
+      await FirestoreService.instance.addCategory(newCategory);
 
       if (!mounted) return;
 

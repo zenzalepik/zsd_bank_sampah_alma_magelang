@@ -4,7 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/custom_text.dart';
 import '../../../core/widgets/custom_card.dart';
 import '../../../data/models/category.dart';
-import '../../../data/services/json_service.dart';
+import '../../../data/services/firestore_service.dart';
 
 import 'add_category_screen.dart';
 
@@ -17,62 +17,47 @@ class CategoryManagementScreen extends StatefulWidget {
 }
 
 class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
-  List<Category> _categories = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCategories();
-  }
-
-  Future<void> _loadCategories() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final categories = await JsonService.instance.loadCategories();
-      setState(() {
-        _categories = categories;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Kategori Sampah')),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _categories.isEmpty
-          ? const EmptyStateCard(
+      body: StreamBuilder<List<Category>>(
+        stream: FirestoreService.instance.getCategoriesStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final categories = snapshot.data ?? [];
+
+          if (categories.isEmpty) {
+            return const EmptyStateCard(
               icon: Icons.category_outlined,
               title: 'Tidak Ada Kategori',
               message: 'Belum ada kategori sampah tersedia',
-            )
-          : RefreshIndicator(
-              onRefresh: _loadCategories,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(AppTheme.paddingMedium),
-                itemCount: _categories.length,
-                itemBuilder: (context, index) {
-                  final category = _categories[index];
-                  return _buildCategoryCard(category);
-                },
-              ),
-            ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(AppTheme.paddingMedium),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              return _buildCategoryCard(category);
+            },
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
+        onPressed: () {
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddCategoryScreen()),
           );
-
-          if (result == true) {
-            _loadCategories();
-          }
         },
         icon: const Icon(Icons.add),
         label: const Text('Tambah Kategori'),
@@ -179,19 +164,35 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             onPressed: () async {
               Navigator.pop(context);
 
-              // Simulate update
-              await Future.delayed(const Duration(seconds: 1));
+              try {
+                final newPrice = double.parse(priceController.text);
+                final updatedCategory = Category(
+                  id: category.id,
+                  name: category.name,
+                  iconUrl: category.iconUrl,
+                  pricePerKg: newPrice,
+                  description: category.description,
+                );
 
-              if (!mounted) return;
+                await FirestoreService.instance.updateCategory(updatedCategory);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Harga berhasil diupdate'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
+                if (!mounted) return;
 
-              _loadCategories();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Harga berhasil diupdate'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              } catch (e) {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Gagal update: $e'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
             },
             child: const Text('Simpan'),
           ),
