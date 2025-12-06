@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing Guide - Bank Sampah Alma Magelang</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-light: #4CAF50;
+            --secondary: #1565C0;
+            --accent: #FF9800;
+            --bg: #F5F7FA;
+            --surface: #FFFFFF;
+            --text: #1F2937;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --code-bg: #1E293B;
+            --code-text: #E2E8F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        ul, ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #F3F4F6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--primary);
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        pre code {
+            background: transparent;
+            color: var(--code-text);
+            padding: 0;
+        }
+
+        .card {
+            background: #F8FAFC;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .badge-success { background: #D1FAE5; color: #065F46; }
+        .badge-warning { background: #FEF3C7; color: #92400E; }
+        .badge-error { background: #FEE2E2; color: #991B1B; }
+        .badge-info { background: #DBEAFE; color: #1E40AF; }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-top: 0.3rem;
+            accent-color: var(--primary);
+        }
+
+        .steps-list {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps-list li {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .steps-list li::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.75rem;
+            height: 1.75rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .expected-results {
+            background: #F0FDF4;
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .expected-results h4 {
+            color: #065F46;
+            margin-bottom: 0.5rem;
+        }
+
+        .edge-cases {
+            background: #FFFBEB;
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .edge-cases h4 {
+            color: #92400E;
+            margin-bottom: 0.5rem;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border);
+            margin: 3rem 0;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .container { padding: 1.5rem; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Testing Guide - Bank Sampah Alma Magelang</h1>
+
+        <h2>Prerequisites</h2>
+        
+        <h3>1. Setup Aplikasi</h3>
+        <pre><code># Clone repository (jika belum)
+cd D:\Github\zsd_bank_sampah_alma_magelang
+
+# Install dependencies
+flutter pub get
+
+# Verify Flutter installation
+flutter doctor</code></pre>
+
+        <h3>2. Persiapan Device</h3>
+        <ul>
+            <li><strong>Emulator/Simulator</strong>: Buka Android Emulator atau iOS Simulator</li>
+            <li><strong>Physical Device</strong>: Hubungkan device via USB dengan USB Debugging enabled</li>
+            <li><strong>WhatsApp</strong>: Pastikan WhatsApp terinstall di device untuk testing fitur chat</li>
+        </ul>
+
+        <h3>3. Run Aplikasi</h3>
+        <pre><code># List available devices
+flutter devices
+
+# Run di device tertentu
+flutter run -d <device-id>
+
+# Atau run dengan hot reload
+flutter run</code></pre>
+
+        <hr>
+
+        <h2>Demo Credentials</h2>
+
+        <div class="card">
+            <h3>👤 Nasabah Account</h3>
+            <pre><code>Username: andi123
+Password: nasabah123</code></pre>
+            <p><strong>Data Nasabah:</strong></p>
+            <ul>
+                <li>Nama: Andi Budiman</li>
+                <li>Balance: Rp 250,000</li>
+                <li>Withdrawable: Rp 200,000</li>
+                <li>Total Transaksi: 3 (1 proses, 2 selesai)</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🚗 Driver Account</h3>
+            <pre><code>Username: budi_driver
+Password: driver123</code></pre>
+            <p><strong>Data Driver:</strong></p>
+            <ul>
+                <li>Nama: Budi Santoso</li>
+                <li>Vehicle: B 1234 XYZ</li>
+                <li>Status: Tersedia</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🛡️ Admin Account</h3>
+            <pre><code>Username: admin
+Password: admin123</code></pre>
+            <p><strong>Data Admin:</strong></p>
+            <ul>
+                <li>Nama: Admin Bank Sampah</li>
+                <li>Access: Full management</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>Testing Flow: NASABAH MODULE</h2>
+
+        <h3>1. Login & Beranda <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Buka aplikasi</li>
+            <li>Pilih role chip <strong>"Nasabah"</strong></li>
+            <li>Input username: <code>andi123</code></li>
+            <li>Input password: <code>nasabah123</code></li>
+            <li>Tap button <strong>"Masuk"</strong></li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Loading indicator muncul</li>
+                <li>✓ Navigate ke Beranda Nasabah</li>
+                <li>✓ Greeting "Selamat Datang, Andi Budiman"</li>
+                <li>✓ Balance card menampilkan Rp 250,000</li>
+                <li>✓ Withdrawable balance Rp 200,000</li>
+                <li>✓ 3 quick action buttons visible</li>
+                <li>✓ Grid 6 kategori sampah dengan icons & harga</li>
+                <li>✓ Info banner tampil</li>
+                <li>✓ Bottom navigation 4 tabs</li>
+            </ul>
+        </div>
+
+        <h3>2. Pengajuan Sampah <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Dari Beranda, tap button <strong>"Ajukan Sampah"</strong> atau tab <strong>"Pengajuan"</strong></li>
+            <li>Pilih minimal 2 kategori dengan checkbox (contoh: Plastik & Kertas)</li>
+            <li>Input berat untuk Plastik: <code>5</code> kg</li>
+            <li>Input berat untuk Kertas: <code>3</code> kg</li>
+            <li>Verifikasi alamat (pre-filled, bisa edit)</li>
+            <li>Tap button <strong>"Ajukan Penjemputan"</strong></li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Kategori yang dipilih aktif (checkmark)</li>
+                <li>✓ Subtotal auto-calculate: Plastik = 5 × 2000 = Rp 10,000</li>
+                <li>✓ Subtotal kertas = 3 × 1500 = Rp 4,500</li>
+                <li>✓ Total card menampilkan: Rp 14,500</li>
+                <li>✓ Button enabled setelah data valid</li>
+                <li>✓ Success SnackBar muncul</li>
+                <li>✓ Form reset setelah submit</li>
+            </ul>
+        </div>
+        <div class="edge-cases">
+            <h4>Edge Cases:</h4>
+            <ul>
+                <li>[ ] Submit tanpa pilih kategori → Should show error</li>
+                <li>[ ] Submit dengan berat kosong → Should show validation</li>
+                <li>[ ] Submit dengan berat 0 atau negative → Should show error</li>
+            </ul>
+        </div>
+
+        <h3>3. Pencairan Saldo <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap button <strong>"Cairkan Saldo"</strong> di quick actions</li>
+            <li>Lihat balance yang bisa dicairkan</li>
+            <li>Baca info rules (minimum Rp 50,000)</li>
+            <li>Input amount: <code>100000</code></li>
+            <li>Pilih method: <strong>"Transfer Bank"</strong></li>
+            <li>Tap <strong>"Ajukan Pencairan"</strong></li>
+            <li>Confirm dialog</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Withdrawable balance: Rp 200,000 tampil</li>
+                <li>✓ Info card dengan rules visible</li>
+                <li>✓ Amount validation realtime</li>
+                <li>✓ Method selection cards clickable</li>
+                <li>✓ Button enabled jika amount valid</li>
+                <li>✓ Success dialog muncul</li>
+                <li>✓ Navigate back ke Beranda</li>
+            </ul>
+        </div>
+        <div class="edge-cases">
+            <h4>Edge Cases:</h4>
+            <ul>
+                <li>[ ] Input amount < Rp 50,000 → Error "Minimum pencairan"</li>
+                <li>[ ] Input amount > balance → Error "Saldo tidak cukup"</li>
+                <li>[ ] Input 0 atau kosong → Button disabled</li>
+            </ul>
+        </div>
+
+        <h3>4. Riwayat Transaksi <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap tab <strong>"Riwayat"</strong> di bottom navigation</li>
+            <li>Lihat list transaksi (Andi Budiman punya 3 transaksi: 1 proses, 2 selesai)</li>
+            <li>Tap filter chip <strong>"Proses"</strong></li>
+            <li>Should show 1 transaction (TRX-008 dengan driver Andi Wijaya)</li>
+            <li>Tap transaction card untuk detail modal</li>
+            <li><strong>Test WhatsApp:</strong> Tap <strong>"Hubungi Driver via WhatsApp"</strong></li>
+            <li>Verify WhatsApp terbuka dengan pesan pre-filled</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Tab "Semua" shows 3 transactions (TRX-001, TRX-006, TRX-008)</li>
+                <li>✓ Filter "Proses" shows 1 transaction (TRX-008)</li>
+                <li>✓ Filter "Selesai" shows 2 transactions (TRX-001, TRX-006)</li>
+                <li>✓ Status badges warna berbeda per status</li>
+                <li>✓ Detail modal muncul dengan drag handle</li>
+                <li>✓ Transaction TRX-008 info: 2 items (Plastik HDPE 8kg, Kertas Koran 12kg), Total Rp 32,000</li>
+                <li>✓ WhatsApp button muncul (karena driver assigned & status=proses)</li>
+                <li>✓ WhatsApp opens dengan pesan: "Halo Andi Wijaya, saya ingin menanyakan tentang penjemputan sampah TRX-008"</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>WhatsApp Testing:</h4>
+            <ul>
+                <li>[ ] Button hanya muncul jika <code>driverId != null</code></li>
+                <li>[ ] Button hanya muncul jika status = <code>proses</code> atau <code>dijemput</code></li>
+                <li>[ ] Tap button → WhatsApp app opens</li>
+                <li>[ ] Phone number format correct (62xxx)</li>
+                <li>[ ] Pre-filled message correct</li>
+            </ul>
+        </div>
+
+        <h3>5. Riwayat Pencairan <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Dari Profile screen, tap <strong>navigation</strong> atau buat screen terpisah</li>
+            <li>Filter by <strong>"Pending"</strong></li>
+            <li>Lihat withdrawal cards</li>
+            <li>Tap card untuk detail</li>
+            <li>Verify rejection reason jika status "Dibatalkan"</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Filter chips working</li>
+                <li>✓ Withdrawal cards dengan status badges</li>
+                <li>✓ Amount & method displayed</li>
+                <li>✓ Detail modal complete</li>
+                <li>✓ Rejection reason tampil jika ada</li>
+                <li>✓ Proof indicator jika terverifikasi</li>
+            </ul>
+        </div>
+
+        <h3>6. Profile Management <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap tab <strong>"Profile"</strong></li>
+            <li>Tap <strong>"Edit Profil"</strong></li>
+            <li>Change nama: <code>Andi Budiman Updated</code></li>
+            <li>Tap <strong>"Simpan"</strong></li>
+            <li>Back dan verify name updated</li>
+            <li>Tap <strong>"Ganti Password"</strong></li>
+            <li>Input old password: <code>nasabah123</code></li>
+            <li>Input new password: <code>nasabah456</code></li>
+            <li>Confirm password: <code>nasabah456</code></li>
+            <li>Tap <strong>"Simpan"</strong></li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Profile info cards tampil</li>
+                <li>✓ Edit form pre-filled dengan data existing</li>
+                <li>✓ Validation working (required, min length)</li>
+                <li>✓ Success feedback setelah save</li>
+                <li>✓ Change password validation working</li>
+                <li>✓ New password must differ from old</li>
+                <li>✓ Success dialog muncul</li>
+            </ul>
+        </div>
+
+        <h3>7. Logout</h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap <strong>"Keluar"</strong> di Profile</li>
+            <li>Confirm dialog</li>
+            <li>Tap <strong>"Logout"</strong></li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Confirmation dialog muncul</li>
+                <li>✓ Navigate back to Login screen</li>
+                <li>✓ Data cleared (tidak auto-login)</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>Testing Flow: DRIVER MODULE</h2>
+
+        <h3>1. Login & Beranda <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Login dengan username: <code>budi_driver</code>, password: <code>driver123</code></li>
+            <li>Verify Beranda Driver</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Driver info header (avatar, nama, vehicle, availability badge)</li>
+                <li>✓ Statistics cards (Penjemputan Aktif, Selesai Hari Ini)</li>
+                <li>✓ Active tasks list dengan cards</li>
+                <li>✓ Task cards showing customer, address, items, amount</li>
+                <li>✓ Bottom navigation 2 tabs (Beranda, Riwayat)</li>
+            </ul>
+        </div>
+
+        <h3>2. Detail Penjemputan <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap salah satu task card dengan status <strong>"proses"</strong></li>
+            <li>Lihat detail transaksi</li>
+            <li><strong>Test WhatsApp:</strong> Tap <strong>"Hubungi Nasabah via WhatsApp"</strong></li>
+            <li>Verify WhatsApp opens</li>
+            <li>Back ke detail</li>
+            <li>Tap button <strong>"Mulai Penjemputan"</strong></li>
+            <li>Wait loading (2 detik)</li>
+            <li>Verify status berubah ke <strong>"dijemput"</strong></li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Status card dengan badge</li>
+                <li>✓ Customer info (nama, alamat)</li>
+                <li>✓ WhatsApp button muncul di customer info section</li>
+                <li>✓ WhatsApp opens dengan pesan: "Halo {nasabah}, saya driver akan mengambil sampah Anda untuk TRX-xxx"</li>
+                <li>✓ Items list dengan weights</li>
+                <li>✓ Weights NOT editable (status masih proses)</li>
+                <li>✓ "Mulai Penjemputan" button visible</li>
+                <li>✓ Loading state working</li>
+                <li>✓ Success SnackBar muncul</li>
+                <li>✓ Status updated</li>
+            </ul>
+        </div>
+
+        <h3>3. Edit Quantities & Complete <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Dari detail dengan status <strong>"dijemput"</strong></li>
+            <li>Edit berat Plastik dari <code>5</code> menjadi <code>4.5</code></li>
+            <li>Verify subtotal auto-recalculate</li>
+            <li>Verify grand total updated</li>
+            <li>Tap <strong>"Simpan Perubahan"</strong></li>
+            <li>Wait loading</li>
+            <li>Tap button <strong>"Selesai"</strong></li>
+            <li>Confirm</li>
+            <li>Verify navigate back</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Weight fields EDITABLE (TextField muncul)</li>
+                <li>✓ Realtime calculation working</li>
+                <li>✓ "Simpan Perubahan" button visible</li>
+                <li>✓ Save success feedback</li>
+                <li>✓ "Selesai" button visible</li>
+                <li>✓ Complete success feedback</li>
+                <li>✓ Navigate back to Beranda</li>
+                <li>✓ Task pindah ke tab "Riwayat"</li>
+            </ul>
+        </div>
+
+        <h3>4. Riwayat Driver</h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap tab <strong>"Riwayat"</strong></li>
+            <li>Lihat completed tasks</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Completed tasks list</li>
+                <li>✓ Status badges "Selesai"</li>
+                <li>✓ Can tap to view detail (read-only)</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>Testing Flow: ADMIN MODULE</h2>
+
+        <h3>1. Login & Dashboard <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Login dengan username: <code>admin</code>, password: <code>admin123</code></li>
+            <li>Verify Dashboard</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ App title "Bank Sampah Alma Magelang"</li>
+                <li>✓ Statistics grid (4 cards dengan real-time counts)</li>
+                <li>✓ Menu cards (5 items)</li>
+                <li>✓ Pencairan Saldo dengan pending badge (jika ada)</li>
+                <li>✓ Refresh button di AppBar</li>
+                <li>✓ Pull-to-refresh working</li>
+            </ul>
+        </div>
+
+        <h3>2. User Management <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap menu <strong>"Manajemen Pengguna"</strong></li>
+            <li>Lihat tab Nasabah (should show 5 users)</li>
+            <li>Tap tab Driver (should show 3 users)</li>
+            <li>Pull-to-refresh</li>
+            <li>Verify FAB untuk "Tambah Driver"</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Tab controller working</li>
+                <li>✓ Nasabah list dengan avatar, nama, username, phone, email, balance, status</li>
+                <li>✓ Driver list dengan avatar, nama, vehicle, availability status</li>
+                <li>✓ Pull-to-refresh working</li>
+                <li>✓ FAB visible di Driver tab</li>
+                <li>✓ Empty state handling</li>
+            </ul>
+        </div>
+
+        <h3>3. Withdrawal Management <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap menu <strong>"Pencairan Saldo"</strong></li>
+            <li>Verify filter default ke <strong>"Pending"</strong></li>
+            <li>Pilih withdrawal dengan status pending</li>
+            <li>Tap <strong>"Setujui"</strong></li>
+            <li>Confirm dialog</li>
+            <li>Verify success feedback</li>
+            <li>Pilih withdrawal lain</li>
+            <li>Tap <strong>"Tolak"</strong></li>
+            <li>Input reason: "Data rekening tidak valid"</li>
+            <li>Confirm</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ List pending withdrawals</li>
+                <li>✓ Filter chips working</li>
+                <li>✓ Withdrawal cards dengan info lengkap</li>
+                <li>✓ Action buttons HANYA di pending</li>
+                <li>✓ Approve dialog dengan amount confirmation</li>
+                <li>✓ Reject dialog dengan reason input (required)</li>
+                <li>✓ Success feedback</li>
+                <li>✓ List refresh after action</li>
+            </ul>
+        </div>
+
+        <h3>4. Transaction Monitoring <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap menu <strong>"Monitoring Transaksi"</strong></li>
+            <li>Verify statistics banner (Total Transaksi, Total Nilai)</li>
+            <li>Filter by <strong>"Selesai"</strong></li>
+            <li>Tap transaction card</li>
+            <li>Lihat detail modal</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Statistics summary dengan gradient banner</li>
+                <li>✓ Real-time calculation by filter</li>
+                <li>✓ Filter chips working</li>
+                <li>✓ Transaction cards dengan nasabah, driver, items summary</li>
+                <li>✓ Detail modal complete</li>
+                <li>✓ Pull-to-refresh working</li>
+            </ul>
+        </div>
+
+        <h3>5. Category Management <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap menu <strong>"Kategori Sampah"</strong></li>
+            <li>Verify 12 categories tampil</li>
+            <li>Tap edit button di salah satu category</li>
+            <li>Change price dari <code>2000</code> ke <code>2500</code></li>
+            <li>Tap <strong>"Simpan"</strong></li>
+            <li>Verify FAB "Tambah Kategori"</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ Categories list dengan icon, nama, deskripsi, harga</li>
+                <li>✓ Edit button per category</li>
+                <li>✓ Edit dialog dengan price input</li>
+                <li>✓ Save success feedback</li>
+                <li>✓ FAB visible</li>
+            </ul>
+        </div>
+
+        <h3>6. Company Profile <span class="badge badge-success">✓</span></h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Tap menu <strong>"Profil Perusahaan"</strong></li>
+            <li>Lihat company info (view mode)</li>
+            <li>Tap edit icon di AppBar</li>
+            <li>Edit "Jam Operasional" dari <code>08:00-16:00</code> ke <code>08:00-17:00</code></li>
+            <li>Edit "Minimum Pencairan" dari <code>50000</code> ke <code>75000</code></li>
+            <li>Tap <strong>"Simpan"</strong></li>
+            <li>Verify view mode kembali</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected Results:</h4>
+            <ul>
+                <li>✓ View mode dengan InfoCards</li>
+                <li>✓ Logo placeholder dengan camera icon</li>
+                <li>✓ All fields displayed (7 fields)</li>
+                <li>✓ Edit mode toggle working</li>
+                <li>✓ Fields editable dengan pre-filled values</li>
+                <li>✓ Cancel button revert changes</li>
+                <li>✓ Save success feedback</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>WhatsApp Integration Testing</h2>
+
+        <h3>Prerequisites</h3>
+        <ul>
+            <li>WhatsApp harus terinstall di testing device</li>
+            <li>Phone number di dummy data harus valid format</li>
+        </ul>
+
+        <h3>Test Case 1: Nasabah → Driver Contact</h3>
+        <p><strong>Location:</strong> Riwayat Transaksi > Detail Modal</p>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Login sebagai Nasabah</li>
+            <li>Navigate ke Riwayat Transaksi</li>
+            <li>Pilih transaction dengan <code>driverId != null</code> dan status <code>proses</code> atau <code>dijemput</code></li>
+            <li>Tap "Hubungi Driver via WhatsApp"</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected:</h4>
+            <ul>
+                <li>WhatsApp opens</li>
+                <li>Phone number: Driver's phone (format 62xxx)</li>
+                <li>Pre-filled message: "Halo {driver.fullName}, saya ingin menanyakan tentang penjemputan sampah TRX-{transactionId}"</li>
+            </ul>
+        </div>
+
+        <h3>Test Case 2: Driver → Nasabah Contact</h3>
+        <p><strong>Location:</strong> Detail Penjemputan > Customer Info Section</p>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Login sebagai Driver</li>
+            <li>Tap task card</li>
+            <li>Di customer info section, tap "Hubungi Nasabah via WhatsApp"</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected:</h4>
+            <ul>
+                <li>WhatsApp opens</li>
+                <li>Phone number: Nasabah's phone (format 62xxx)</li>
+                <li>Pre-filled message: "Halo {nasabah.fullName}, saya driver akan mengambil sampah Anda untuk TRX-{transactionId}"</li>
+            </ul>
+        </div>
+
+        <h3>Test Case 3: Error Handling</h3>
+        <p><strong>Steps:</strong></p>
+        <ol class="steps-list">
+            <li>Uninstall WhatsApp dari device</li>
+            <li>Tap WhatsApp button</li>
+            <li>Verify error message</li>
+        </ol>
+        <div class="expected-results">
+            <h4>Expected:</h4>
+            <ul>
+                <li>SnackBar dengan pesan error: "Tidak dapat membuka WhatsApp: ..."</li>
+                <li>App tidak crash</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>General Testing Checklist</h2>
+
+        <h3>UI/UX <span class="badge badge-success">✓</span></h3>
+        <ul>
+            <li>[ ] All screens responsive (landscape & portrait)</li>
+            <li>[ ] Consistent color scheme (green primary, blue secondary, orange accent)</li>
+            <li>[ ] Material 3 design visible</li>
+            <li>[ ] Status badges warna sesuai (success=green, warning=orange, error=red, info=blue)</li>
+            <li>[ ] Loading states tampil saat async operations</li>
+            <li>[ ] Empty states friendly dengan icon & message</li>
+            <li>[ ] Bottom navigation selected state clear</li>
+        </ul>
+
+        <h3>Navigation <span class="badge badge-success">✓</span></h3>
+        <ul>
+            <li>[ ] Back button working di semua screens</li>
+            <li>[ ] Bottom navigation persistent</li>
+            <li>[ ] Modal bottom sheets draggable</li>
+            <li>[ ] Dialogs dapat di-dismiss</li>
+            <li>[ ] Deep navigation working (detail → back → list)</li>
+        </ul>
+
+        <h3>Data Display <span class="badge badge-success">✓</span></h3>
+        <ul>
+            <li>[ ] Price formatting: Rp XXX,XXX (with comma)</li>
+            <li>[ ] Date formatting: DD/MM/YYYY HH:MM</li>
+            <li>[ ] Phone formatting: 0812-3456-7890</li>
+            <li>[ ] Empty data handled gracefully</li>
+            <li>[ ] Long text truncated dengan ellipsis</li>
+        </ul>
+
+        <h3>Forms & Validation <span class="badge badge-success">✓</span></h3>
+        <ul>
+            <li>[ ] Required fields marked</li>
+            <li>[ ] Real-time validation</li>
+            <li>[ ] Error messages clear</li>
+            <li>[ ] Success feedback visible</li>
+            <li>[ ] Form reset after submit</li>
+            <li>[ ] Cancel button working</li>
+        </ul>
+
+        <h3>Performance <span class="badge badge-warning">⚠️</span></h3>
+        <ul>
+            <li>[ ] App loads < 3 seconds</li>
+            <li>[ ] Smooth scrolling (60fps)</li>
+            <li>[ ] No jank during animations</li>
+            <li>[ ] Memory usage reasonable</li>
+            <li>[ ] No memory leaks after multiple navigations</li>
+        </ul>
+
+        <hr>
+
+        <h2>Bug Reporting Template</h2>
+        <p>Jika menemukan bug, report dengan format berikut:</p>
+        <pre><code>## Bug Report
+
+**Module:** [Nasabah/Driver/Admin]
+**Screen:** [Nama screen]
+**Priority:** [Critical/High/Medium/Low]
+
+**Steps to Reproduce:**
+1. Step 1
+2. Step 2
+3. Step 3
+
+**Expected Behavior:**
+[Apa yang seharusnya terjadi]
+
+**Actual Behavior:**
+[Apa yang benar-benar terjadi]
+
+**Screenshots:**
+[Attach screenshots jika ada]
+
+**Device Info:**
+- OS: Android/iOS
+- Version: 
+- Device: 
+- App Version: 
+
+**Additional Notes:**
+[Info tambahan]</code></pre>
+
+        <hr>
+
+        <h2>Known Limitations</h2>
+
+        <div class="card">
+            <h3>☑️ Data Persistence:</h3>
+            <ul>
+                <li>Data menggunakan dummy JSON</li>
+                <li>Data <strong>tidak persisten</strong> setelah app restart</li>
+                <li>Setiap restart akan reset ke dummy data</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>☑️ Maps Integration:</h3>
+            <ul>
+                <li>Belum implemented (requires google_maps_flutter plugin)</li>
+                <li>Koordinat location sudah ada di model</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>☑️ Real Geolocation:</h3>
+            <ul>
+                <li>Belum implemented (requires geolocator plugin)</li>
+                <li>Address field manual input only</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>☑️ Image Upload:</h3>
+            <ul>
+                <li>Avatar & proof of payment belum bisa upload</li>
+                <li>Hanya placeholder icon</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>☑️ Real-time Sync:</h3>
+            <ul>
+                <li>Tidak ada real-time updates</li>
+                <li>Perlu manual refresh (pull-to-refresh)</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>Next Phase Testing (Future)</h2>
+
+        <h3>When Backend is Ready:</h3>
+        <ol>
+            <li><strong>API Integration Testing</strong>
+                <ul>
+                    <li>Login authentication</li>
+                    <li>CRUD operations</li>
+                    <li>Real-time updates</li>
+                    <li>Error handling (401, 404, 500, etc)</li>
+                </ul>
+            </li>
+            <li><strong>Push Notifications</strong>
+                <ul>
+                    <li>Transaction status updates</li>
+                    <li>Withdrawal approval</li>
+                    <li>New pickup requests</li>
+                </ul>
+            </li>
+            <li><strong>Advanced Features</strong>
+                <ul>
+                    <li>Google Maps navigation</li>
+                    <li>Real geolocation</li>
+                    <li>Image capture & upload</li>
+                    <li>Report generation</li>
+                </ul>
+            </li>
+        </ol>
+
+        <hr>
+
+        <h2>Support & Questions</h2>
+        <p>Jika ada pertanyaan atau menemukan issue:</p>
+        <ol>
+            <li>Check dokumentasi di <code>docs/</code></li>
+            <li>Review code di relevant feature folders</li>
+            <li>Check dummy data di <code>assets/jsons/</code></li>
+        </ol>
+        <p style="margin-top: 2rem; text-align: center; font-weight: bold; color: var(--primary);">Happy Testing! 🚀</p>
+    </div>
+</body>
+</html>

@@ -6,6 +6,8 @@ import '../../../core/widgets/custom_card.dart';
 import '../../../data/models/category.dart';
 import '../../../data/services/json_service.dart';
 
+import 'add_category_screen.dart';
+
 class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
 
@@ -62,13 +64,15 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Tambah Kategori - Coming Soon'),
-              backgroundColor: AppColors.info,
-            ),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddCategoryScreen()),
           );
+
+          if (result == true) {
+            _loadCategories();
+          }
         },
         icon: const Icon(Icons.add),
         label: const Text('Tambah Kategori'),

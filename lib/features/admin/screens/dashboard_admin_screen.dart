@@ -126,7 +126,8 @@ class _DashboardAdminScreenState extends State<DashboardAdminScreen> {
               onRefresh: _loadStatistics,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                // padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -145,8 +146,8 @@ class _DashboardAdminScreenState extends State<DashboardAdminScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 0,
+                      mainAxisSpacing: 0,
                       childAspectRatio: 1.4,
                       children: [
                         StatCard(

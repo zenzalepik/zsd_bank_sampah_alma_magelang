@@ -98,6 +98,14 @@ class JsonService {
     return _categories!;
   }
 
+  /// Add new category
+  void addCategory(Category category) {
+    if (_categories == null) {
+      _categories = [];
+    }
+    _categories!.add(category);
+  }
+
   /// Load transactions
   Future<List<Transaction>> loadTransactions() async {
     if (_transactions != null) return _transactions!;
