@@ -116,6 +116,7 @@ class FirestoreService {
         });
   }
 
+  //
   Future<void> addWithdrawal(Withdrawal withdrawal) async {
     await _firestore
         .collection(_collectionWithdrawals)
